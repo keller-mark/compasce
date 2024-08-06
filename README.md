@@ -17,7 +17,18 @@ import comparisce as csc
 
 adata = read_h5ad("my_adata.h5ad")
 zarr_path = "my_adata.h5ad.zarr"
+client = csc.create_dask_client()
 
+csc.run_all(adata, zarr_path, client=client)
+```
+
+Or, run functions individually:
+
+```python
+import comparisce as csc
+
+adata = read_h5ad("my_adata.h5ad")
+zarr_path = "my_adata.h5ad.zarr"
 client = csc.create_dask_client()
 
 ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
