@@ -5,14 +5,17 @@ import dask.array as da
 from .dask import create_dask_wrapper
 
 
-def normalize_basic(adata):
-    adata.layers["logcounts"] = adata.layers["counts"].copy()
-    sc.pp.normalize_total(adata, target_sum = 1e6, layer='logcounts', inplace=True)
-    sc.pp.log1p(adata, layer='logcounts', copy=False)
+def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
+    ladata.layers[output_key] = ladata.layers[input_key].copy()
 
-    adata.save()
+    # Scanpy gets confused by non-AnnData objects even when it is AnnData-like
+    adata = ladata.adata
+    sc.pp.normalize_total(adata, target_sum = 1e6, layer=output_key, inplace=True)
+    sc.pp.log1p(adata, layer=output_key, copy=False)
 
-    return adata
+    ladata.save()
+
+    return ladata
 
 
 def _normalize_pearson_residuals(X, theta = 100, clip = None):
@@ -39,12 +42,12 @@ def _normalize_pearson_residuals(X, theta = 100, clip = None):
     return residuals.clip(min=-clip, max=clip)
 
 
-def normalize_pearson_residuals(adata):
+def normalize_pearson_residuals(adata, input_key="counts", output_key="pearson_residuals"):
     def get_input_arr():
-        return adata.get_da_from_zarr_layer("counts")
+        return adata.get_da_from_zarr_layer(input_key)
     
     def put_output_arr(output_arr):
-        adata.put_da_to_zarr_layer("pearson_residuals", output_arr)
+        adata.put_da_to_zarr_layer(output_key, output_arr)
 
     normalize_pearson_residuals_dask = create_dask_wrapper(_normalize_pearson_residuals)
     normalize_pearson_residuals_dask(get_input_arr, put_output_arr)

@@ -1,10 +1,19 @@
 import zarr
 import dask.array as da
+from anndata import AnnData
 
 from .zarr_io import dispatched_read_zarr, dispatched_write_zarr
 
 
 class LazyAnnData:
+
+    zarr_path = None
+    adata = None
+    var_chunk_size = None
+    client = None
+
+    # For scanpy compatibility
+    is_view = False
 
     def __init__(self, zarr_path, var_chunk_size=5, client=None):
         self.zarr_path = zarr_path
@@ -12,14 +21,22 @@ class LazyAnnData:
         self.var_chunk_size = var_chunk_size
         self.client = client
     
-    def __getitem__(self, key):
+    def __getattr__(self, key):
+        # __getattr__ only gets called for attributes that don't actually exist
         print(f"Getting {key}")
-        return self.adata.__dict__[key]
+        if key in {"obs", "var", "uns", "obsm", "varm", "layers", "X"}:
+            return getattr(self.adata, key)
+        
+        raise AttributeError(f"'LazyAnnData' object has no attribute '{key}'")
     
-    def __setitem__(self, key, value):
+    def __setattr__(self, key, value):
         print(f"Setting {key}")
-        self.adata.__dict__[key] = value
+        if key in {"obs", "var", "uns", "obsm", "varm", "layers", "X"}:
+            setattr(self.adata, key, value)
+        
+        super().__setattr__(key, value)
     
+
     def save(self, arr_path=None, mode="r+"):
         dispatched_write_zarr(self.adata, self.zarr_path, var_chunk_size=self.var_chunk_size, arr_path=arr_path, mode=mode)
 
