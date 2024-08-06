@@ -12,16 +12,20 @@ pip install comparisce
 
 ## Usage
 
-Usage follows the scverse API conventions.
-Parameter names follow the R implementation of `miQC`.
-
 ```python
 import comparisce as csc
 
-# ...
+adata = read_h5ad("my_adata.h5ad")
+zarr_path = "my_adata.h5ad.zarr"
 
-csc.calculate_miqc(adata)
-csc.filter_cells(adata)
+client = csc.create_dask_client()
+
+ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
+ladata.save()
+
+# Normalization
+csc.normalize_basic(ladata)
+csc.normalize_pearson_residuals(ladata)
 ```
 
 
