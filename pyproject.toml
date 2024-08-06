@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=67.0", "wheel>=0.38.4"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comparisce"
+version = "0.0.1"
+authors = [
+  { name="Mark Keller", email="mark_keller@hms.harvard.edu" },
+]
+description = "Preprocessing functions that support comparison of single-cell data"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+keywords = ["single-cell"]
+classifiers = [
+  'Development Status :: 4 - Beta',
+  'Intended Audience :: Science/Research',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+]
+dependencies = [
+  'pandas',
+  'numpy<=2.0.0',
+  'anndata>=0.7.8,<0.11',
+  'scanpy>=1.9.3',
+  'scipy',
+  'dask',
+  'dask-ml',
+  'distributed',
+  'joblib',
+  'scikit-learn',
+  'zarr',
+  'miqc_py==0.0.1',
+]
+
+[project.optional-dependencies]
+dev = [
+  'build==0.1.0',
+  'pytest>=6.2.4',
+  'flake8==3.8.4',
+  'jupyterlab',
+  'snakemake',
+  'pertpy',
+  'requests',
+  'altair',
+]
+
+[project.urls]
+repository = "https://github.com/keller-mark/comparisce"
+
+# Reference: https://stackoverflow.com/a/74421415
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Reference: https://stackoverflow.com/a/50156706
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
