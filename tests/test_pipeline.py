@@ -44,12 +44,8 @@ def test_normalization():
     assert X_pearson_residuals.chunks == (20000, 5)
     assert np.nansum(X_pearson_residuals) == pytest.approx(127542.086)
 
-    
 
-
-
-
-
+    # csc.densmap(ladata)
     
 
 

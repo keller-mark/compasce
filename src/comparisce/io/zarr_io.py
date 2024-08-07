@@ -6,7 +6,7 @@ from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
 
 
-def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
+def dispatched_read_zarr(store, allow_X=False, allow_raw=False, allow_layers=None):
     # Function that reads an AnnData object from a Zarr store but omits certain keys.
     # Adapted from https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/zarr.py#L51
     if isinstance(store, zarr.Group):
@@ -17,11 +17,11 @@ def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
     # Read with handling for backwards compat
     def callback(func, elem_name: str, elem, iospec):
         #print(f"Reading {elem_name}")
-        if elem_name == "/X" and omit_X:
+        if elem_name == "/X" and not allow_X:
             return None
-        if elem_name == "/raw" and omit_raw:
+        if elem_name == "/raw" and not allow_raw:
             return None
-        if omit_layers is not None and elem_name in [f"/layers/{l}" for l in omit_layers]:
+        if allow_layers is None or elem_name not in [f"/layers/{l}" for l in allow_layers]:
             return None
 
         if elem_name == "/layers":
@@ -31,7 +31,7 @@ def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
             elem = {
                 k: v
                 for k, v in elem.items()
-                if omit_layers is None or k not in omit_layers
+                if allow_layers is not None and k in allow_layers
             }
 
         if iospec.encoding_type == "anndata" or elem_name.endswith("/"):

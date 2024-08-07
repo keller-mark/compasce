@@ -13,7 +13,7 @@ def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
     sc.pp.normalize_total(adata, target_sum = 1e6, layer=output_key, inplace=True)
     sc.pp.log1p(adata, layer=output_key, copy=False)
 
-    ladata.save()
+    ladata.save(arr_path=["layers", output_key])
 
     return ladata
 

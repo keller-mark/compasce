@@ -2,6 +2,7 @@ import os
 import platform
 
 from .normalization import normalize_basic, normalize_pearson_residuals
+from .densmap import densmap
 from .io.lazy_anndata import create_lazy_anndata
 
 
@@ -23,6 +24,8 @@ def run_all(adata, zarr_path, client=None):
     # depends on: uns/write_metadata/layers/counts
     # creates: /layers/pearson_residuals
     normalize_pearson_residuals(ladata)
+
+    densmap(ladata)
 
 
     return True
