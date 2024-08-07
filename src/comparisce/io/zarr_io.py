@@ -4,9 +4,9 @@ import dask.array as da
 from anndata import AnnData
 from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
+from dask.distributed import progress
 
-
-def dispatched_read_zarr(store, allow_X=False, allow_raw=False, allow_layers=None):
+def dispatched_read_zarr(store):
     # Function that reads an AnnData object from a Zarr store but omits certain keys.
     # Adapted from https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/zarr.py#L51
     if isinstance(store, zarr.Group):
@@ -17,22 +17,16 @@ def dispatched_read_zarr(store, allow_X=False, allow_raw=False, allow_layers=Non
     # Read with handling for backwards compat
     def callback(func, elem_name: str, elem, iospec):
         #print(f"Reading {elem_name}")
-        if elem_name == "/X" and not allow_X:
+        if elem_name == "/X":
             return None
-        if elem_name == "/raw" and not allow_raw:
-            return None
-        if allow_layers is None or elem_name not in [f"/layers/{l}" for l in allow_layers]:
+        if elem_name == "/raw":
             return None
 
-        if elem_name == "/layers":
+        if elem_name == "/layers" or elem_name == "/obsm":
             # We want to trick the anndata read_basic_zarr function into thinking that this Zarr group
             # only contains a subset of keys.
             # Reference: https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/specs/methods.py#L145
-            elem = {
-                k: v
-                for k, v in elem.items()
-                if allow_layers is not None and k in allow_layers
-            }
+            elem = {}
 
         if iospec.encoding_type == "anndata" or elem_name.endswith("/"):
             return AnnData(
@@ -46,9 +40,10 @@ def dispatched_read_zarr(store, allow_X=False, allow_raw=False, allow_layers=Non
             return None
         elif elem_name in {"/obs", "/var"}:
             return read_dataframe(elem)
-        elif elem_name == "/raw":
+        #elif elem_name == "/raw":
             # Backwards compat
-            return _read_legacy_raw(f, func(elem), read_dataframe, func)
+        #    return _read_legacy_raw(f, func(elem), read_dataframe, func)
+        
         return func(elem)
 
     adata = read_dispatched(f, callback=callback)
@@ -66,7 +61,7 @@ def dispatched_read_zarr(store, allow_X=False, allow_raw=False, allow_layers=Non
     return adata
 
 
-def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+"):
+def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+", client=None):
     # Write to Zarr and set custom chunk shape for layers
     # Reference: https://anndata.readthedocs.io/en/latest/tutorials/notebooks/%7Bread%2Cwrite%7D_dispatched.html
     def write_chunked(func, store, k, elem, dataset_kwargs, iospec):

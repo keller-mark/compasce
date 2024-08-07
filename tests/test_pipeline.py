@@ -19,7 +19,6 @@ def test_normalization():
     client = csc.create_dask_client(memory_limit="2GB")
 
     ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
-    ladata.save()
 
     # Normalize basic
     csc.normalize_basic(ladata)
