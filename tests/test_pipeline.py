@@ -6,6 +6,7 @@ import pandas as pd
 from os.path import join
 from anndata import read_h5ad
 import dask.array as da
+import shutil
 
 import comparisce as csc
 
@@ -15,6 +16,7 @@ ADATA_PATH = join(DATA_DIR, "lake_et_al.subset.h5ad")
 def test_normalization():
     adata = read_h5ad(ADATA_PATH)
     zarr_path = join(DATA_DIR, "test_normalization.h5ad.zarr")
+    shutil.rmtree(zarr_path, ignore_errors=True)
 
     client = csc.create_dask_client(memory_limit="2GB")
 
