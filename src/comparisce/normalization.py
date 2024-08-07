@@ -11,11 +11,11 @@ def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
     print("before normalize_total:", np.sum(ladata.layers[output_key][()]))
 
     # Scanpy gets confused by non-AnnData objects even when it is AnnData-like
-    sc.pp.normalize_total(ladata, target_sum = 1e6, layer=output_key, inplace=False)
+    sc.pp.normalize_total(ladata, target_sum = 1e6, layer=output_key, inplace=True)
 
     print("after normalize_total:", np.sum(ladata.layers[output_key][()]))
 
-    ladata.layers[output_key][:, :] = np.log1p(ladata.layers[output_key])
+    ladata.layers[output_key] = np.log1p(ladata.layers[output_key])
     print("after log1p:", np.sum(ladata.layers[output_key][()]))
     ladata.save(arr_path=["layers", output_key])
 
