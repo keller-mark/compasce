@@ -10,16 +10,18 @@ import shutil
 
 import comparisce as csc
 
-DATA_DIR = join("data")
-ADATA_PATH = join(DATA_DIR, "lake_et_al.subset.h5ad")
+from .fixtures import DATA_DIR, adata_fixture, client_fixture
 
-def test_normalization():
-    adata = read_h5ad(ADATA_PATH)
+@pytest.fixture
+def normalization_zarr_path():
     zarr_path = join(DATA_DIR, "test_normalization.h5ad.zarr")
     shutil.rmtree(zarr_path, ignore_errors=True)
+    return zarr_path
 
-    client = csc.create_dask_client(memory_limit="2GB")
-
+def test_normalization(adata_fixture, client_fixture, normalization_zarr_path):
+    client = client_fixture
+    adata = adata_fixture
+    zarr_path = normalization_zarr_path
     ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
 
     # Normalize basic

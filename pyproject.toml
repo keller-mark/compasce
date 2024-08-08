@@ -40,6 +40,7 @@ dependencies = [
 dev = [
   'build==0.1.0',
   'pytest>=6.2.4',
+  'pytest-memray',
   'flake8==3.8.4',
   'jupyterlab',
   'snakemake',
