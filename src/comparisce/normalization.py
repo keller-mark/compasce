@@ -6,14 +6,14 @@ from .dask import create_dask_wrapper
 
 
 def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
-    ladata.layers[output_key] = ladata.layers[input_key].copy()
+    ladata.copy_layer(input_key, output_key)
 
-    # Scanpy gets confused by non-AnnData objects even when it is AnnData-like
-    adata = ladata.adata
-    sc.pp.normalize_total(adata, target_sum = 1e6, layer=output_key, inplace=True)
-    sc.pp.log1p(adata, layer=output_key, copy=False)
+    # TODO: is this enough to reduce memory overhead, or do we need to use Dask?
+    # If so, follow the pattern of normalize_pearson_residuals
+    sc.pp.normalize_total(ladata, target_sum = 1e6, layer=output_key, inplace=True)
 
-    ladata.save()
+    ladata.layers[output_key] = np.log1p(ladata.layers[output_key])
+    ladata.save(arr_path=["layers", output_key])
 
     return ladata
 

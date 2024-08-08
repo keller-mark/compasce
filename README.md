@@ -32,7 +32,6 @@ zarr_path = "my_adata.h5ad.zarr"
 client = csc.create_dask_client()
 
 ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
-ladata.save()
 
 # Normalization
 csc.normalize_basic(ladata)

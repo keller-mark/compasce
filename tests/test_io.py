@@ -3,20 +3,53 @@ import pytest
 import zarr
 import numpy as np
 import pandas as pd
+import os
 from os.path import join
 from anndata import read_h5ad
 import dask.array as da
+import shutil
 
 import comparisce as csc
 
-DATA_DIR = join("data")
-ADATA_PATH = join(DATA_DIR, "lake_et_al.subset.h5ad")
+from .fixtures import DATA_DIR, adata_fixture, client_fixture
 
-def test_zarr_writing():
-    adata = read_h5ad(ADATA_PATH)
+@pytest.fixture
+def writing_zarr_path():
     zarr_path = join(DATA_DIR, "test_zarr_writing.h5ad.zarr")
+    shutil.rmtree(zarr_path, ignore_errors=True)
+    return zarr_path
 
-    client = csc.create_dask_client(memory_limit="2GB")
+@pytest.fixture
+def creation_zarr_path():
+    zarr_path = join(DATA_DIR, "test_zarr_creation.h5ad.zarr")
+    shutil.rmtree(zarr_path, ignore_errors=True)
+    return zarr_path
+
+def get_dirsize(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            # skip if it is symbolic link
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+
+    return total_size
+
+@pytest.mark.limit_memory("30 MB")
+def test_zarr_creation(adata_fixture, client_fixture, creation_zarr_path):
+    client = client_fixture
+    adata = adata_fixture
+    zarr_path = creation_zarr_path
+
+    csc.io.create_lazy_anndata(adata, zarr_path, client=client)
+    assert os.path.exists(join(zarr_path, "layers", "counts", ".zdone"))
+    assert get_dirsize(zarr_path) >= 60 * 1000000 # 60 MB
+
+def test_zarr_writing(adata_fixture, client_fixture, writing_zarr_path):
+    client = client_fixture
+    adata = adata_fixture
+    zarr_path = writing_zarr_path
 
     ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
     ladata.save()

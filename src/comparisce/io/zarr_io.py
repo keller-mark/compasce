@@ -1,12 +1,14 @@
 import numpy as np
 import zarr
+import json
+from os.path import join
 import dask.array as da
 from anndata import AnnData
 from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
+from dask.distributed import progress
 
-
-def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
+def dispatched_read_zarr(store):
     # Function that reads an AnnData object from a Zarr store but omits certain keys.
     # Adapted from https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/zarr.py#L51
     if isinstance(store, zarr.Group):
@@ -17,22 +19,16 @@ def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
     # Read with handling for backwards compat
     def callback(func, elem_name: str, elem, iospec):
         #print(f"Reading {elem_name}")
-        if elem_name == "/X" and omit_X:
+        if elem_name == "/X":
             return None
-        if elem_name == "/raw" and omit_raw:
-            return None
-        if omit_layers is not None and elem_name in [f"/layers/{l}" for l in omit_layers]:
+        if elem_name == "/raw":
             return None
 
-        if elem_name == "/layers":
+        if elem_name == "/layers" or elem_name == "/obsm":
             # We want to trick the anndata read_basic_zarr function into thinking that this Zarr group
             # only contains a subset of keys.
             # Reference: https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/specs/methods.py#L145
-            elem = {
-                k: v
-                for k, v in elem.items()
-                if omit_layers is None or k not in omit_layers
-            }
+            elem = {}
 
         if iospec.encoding_type == "anndata" or elem_name.endswith("/"):
             return AnnData(
@@ -46,9 +42,10 @@ def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
             return None
         elif elem_name in {"/obs", "/var"}:
             return read_dataframe(elem)
-        elif elem_name == "/raw":
+        #elif elem_name == "/raw":
             # Backwards compat
-            return _read_legacy_raw(f, func(elem), read_dataframe, func)
+        #    return _read_legacy_raw(f, func(elem), read_dataframe, func)
+        
         return func(elem)
 
     adata = read_dispatched(f, callback=callback)
@@ -65,8 +62,15 @@ def dispatched_read_zarr(store, omit_X=False, omit_raw=True, omit_layers=None):
 
     return adata
 
+def write_zdone(out_path, arr_path=None):
+    # Write a hidden file at `out_path/arr_path/.zdone``
+    # to indicate done-ness of an operation for Snakemake
+    if arr_path is not None:
+        json_path = join(out_path, *arr_path, ".zdone")
+        with open(json_path, 'w') as f:
+            json.dump({"done": True}, f)
 
-def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+"):
+def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+", client=None):
     # Write to Zarr and set custom chunk shape for layers
     # Reference: https://anndata.readthedocs.io/en/latest/tutorials/notebooks/%7Bread%2Cwrite%7D_dispatched.html
     def write_chunked(func, store, k, elem, dataset_kwargs, iospec):
@@ -92,6 +96,8 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
         elif elem is None:
             print("Skipping writing of None element")
         else:
+            # TODO: Prevent overwriting of existing zarr arrays
+            # to ensure only addition (not modification) and improve performance?
             func(store, k, elem, dataset_kwargs=dataset_kwargs)
 
     z = zarr.open(out_path, mode=mode)
@@ -104,7 +110,7 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
     old_delitem = z.__class__.__delitem__
     def patched_delitem(self, item):
         print(f"Attepting to delete {item}")
-        if item == "/layers":
+        if item == "/layers" or item == "/obsm":
             pass
         else:
             old_delitem(self, item)
@@ -115,19 +121,5 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
     z.clear = old_clear
     z.__class__.__delitem__ = old_delitem
 
+    write_zdone(out_path, arr_path=arr_path)
 
-    if arr_path is not None:
-        if "write_metadata" not in z["uns"]:
-            write_metadata = z["uns"].create_group("write_metadata")
-        else:
-            write_metadata = z["uns"]["write_metadata"]
-        
-        group_name = arr_path[0]
-        subgroup_name = arr_path[1] if len(arr_path) > 1 else None
-        if group_name not in write_metadata:
-            group = write_metadata.create_group(group_name)
-        else:
-            group = write_metadata[group_name]
-        
-        if subgroup_name is not None:
-            group.create_group(subgroup_name)    
