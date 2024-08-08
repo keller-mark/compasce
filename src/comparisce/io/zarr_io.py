@@ -1,5 +1,7 @@
 import numpy as np
 import zarr
+import json
+from os.path import join
 import dask.array as da
 from anndata import AnnData
 from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
@@ -60,6 +62,13 @@ def dispatched_read_zarr(store):
 
     return adata
 
+def write_zdone(out_path, arr_path=None):
+    # Write a hidden file at `out_path/arr_path/.zdone``
+    # to indicate done-ness of an operation for Snakemake
+    if arr_path is not None:
+        json_path = join(out_path, *arr_path, ".zdone")
+        with open(json_path, 'w') as f:
+            json.dump({"done": True}, f)
 
 def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+", client=None):
     # Write to Zarr and set custom chunk shape for layers
@@ -87,6 +96,8 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
         elif elem is None:
             print("Skipping writing of None element")
         else:
+            # TODO: Prevent overwriting of existing zarr arrays
+            # to ensure only addition (not modification) and improve performance?
             func(store, k, elem, dataset_kwargs=dataset_kwargs)
 
     z = zarr.open(out_path, mode=mode)
@@ -99,7 +110,7 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
     old_delitem = z.__class__.__delitem__
     def patched_delitem(self, item):
         print(f"Attepting to delete {item}")
-        if item == "/layers":
+        if item == "/layers" or item == "/obsm":
             pass
         else:
             old_delitem(self, item)
@@ -110,19 +121,5 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
     z.clear = old_clear
     z.__class__.__delitem__ = old_delitem
 
+    write_zdone(out_path, arr_path=arr_path)
 
-    if arr_path is not None:
-        if "write_metadata" not in z["uns"]:
-            write_metadata = z["uns"].create_group("write_metadata")
-        else:
-            write_metadata = z["uns"]["write_metadata"]
-        
-        group_name = arr_path[0]
-        subgroup_name = arr_path[1] if len(arr_path) > 1 else None
-        if group_name not in write_metadata:
-            group = write_metadata.create_group(group_name)
-        else:
-            group = write_metadata[group_name]
-        
-        if subgroup_name is not None:
-            group.create_group(subgroup_name)    

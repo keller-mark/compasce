@@ -45,8 +45,14 @@ def test_normalization():
     assert X_pearson_residuals.chunks == (20000, 5)
     assert np.nansum(X_pearson_residuals) == pytest.approx(127542.086)
 
+    # Run densMAP
+    csc.densmap(ladata)
 
-    # csc.densmap(ladata)
+    X_densmap = z["/obsm/X_densmap"]
+    assert X_densmap.shape == (20000, 2)
+    assert X_densmap.dtype == np.float32
+    assert np.sum(X_densmap) == pytest.approx(127462.37)
+    
     
 
 

@@ -34,7 +34,6 @@ dependencies = [
   'joblib',
   'scikit-learn',
   'zarr',
-  'miqc_py==0.0.1',
 ]
 
 [project.optional-dependencies]
