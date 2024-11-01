@@ -34,6 +34,8 @@ def dir_name_to_str(dir_name):
 class ComparativeData:
     def __init__(self, zarr_path, group_pairs=[]):
         self.zarr_path = zarr_path
+        # Zarr open_consolidated will fail unless the root contains a group.
+        zarr.open(zarr_path, mode="a")
         self.group_pairs = []
     
     def create_lazy_anndata(self, adata, dir_name="__all__", name=None, arr_path=None, mode="w", client=None):
@@ -43,8 +45,6 @@ class ComparativeData:
         return LazyAnnData(adata_path, client=client)
 
     def update(self):
-        try:
-            zarr.consolidate_metadata(self.zarr_path)
-        except zarr.errors.PathNotFoundError:
-            pass
+        zarr.consolidate_metadata(self.zarr_path)
+       
         # TODO: merge consolidated metadata with the dicts saved in /*/*.adata.zarr/uns/*
