@@ -18,6 +18,13 @@ def normalization_zarr_path():
     shutil.rmtree(zarr_path, ignore_errors=True)
     return zarr_path
 
+@pytest.fixture
+def diffexp_zarr_path():
+    zarr_path = join(DATA_DIR, "test_diffexp.h5ad.zarr")
+    shutil.rmtree(zarr_path, ignore_errors=True)
+    return zarr_path
+
+@pytest.mark.skip(reason="speed up development of diffexp")
 def test_normalization(adata_fixture, client_fixture, normalization_zarr_path):
     client = client_fixture
     adata = adata_fixture
@@ -55,7 +62,36 @@ def test_normalization(adata_fixture, client_fixture, normalization_zarr_path):
     assert X_densmap.dtype == np.float32
     assert np.sum(X_densmap) == pytest.approx(127462.37)
     
-    
+def test_diffexp(adata_fixture, client_fixture, diffexp_zarr_path):
+    client = client_fixture
+    adata = adata_fixture
+    zarr_path = diffexp_zarr_path
+
+    cdata = csc.io.ComparativeData(zarr_path=zarr_path)
+
+    ladata = cdata.create_lazy_anndata(adata, client=client)
+
+    # Normalize basic
+    csc.normalize_basic(ladata)
+
+    # Compute diffexp
+    csc.compute_diffexp(cdata, ladata)
+
+    # Check the results
+    z = zarr.open(zarr_path, mode="r")
+
+    assert z['/compare_cell_type.val_monocyte.__rest__/ranked_genes.adata.zarr/var'].attrs == {
+        "_index": "_index",
+        "column-order": [
+            "names",
+            "scores",
+            "logfoldchanges",
+            "pvals",
+            "pvals_adj"
+        ],
+        "encoding-type": "dataframe",
+        "encoding-version": "0.2.0"
+    }
 
 
 

@@ -38,6 +38,11 @@ csc.normalize_basic(ladata)
 csc.normalize_pearson_residuals(ladata)
 ```
 
+## ComparativeData format
+
+A ComparativeData object is a container for AnnData, MuData, and SpatialData objects.
+We define this format as a convention for how to store pre-computed comparison results.
+We acknowledge that it does not support all possible comparative use cases, however we have designed it to support common use cases.
 
 ## Development
 

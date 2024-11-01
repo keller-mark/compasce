@@ -74,7 +74,7 @@ class LazyAnnData(AnnData):
         
         z = orig_getattr(self, "z")
         # __getattr__ only gets called for attributes that don't actually exist
-        print(f"Getting {key}")
+        #print(f"Getting {key}")
         if key in { "X" }:
             if ("X",) in self.aliases:
                 on_disk_path = self.aliases[("X",)]
