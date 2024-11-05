@@ -1,19 +1,24 @@
-# comparisce
+# compasce
 
-[![PyPI](https://img.shields.io/pypi/v/comparisce)](https://pypi.org/project/comparisce)
+<!--[![PyPI](https://img.shields.io/pypi/v/compasce)](https://pypi.org/project/compasce)-->
 
-Preprocessing functions that support comparison of single-cell data
+Data processing functions to support visual comparisons of single-cell data.
+
+
+:warning: Work in progress
+
+
 
 ## Installation
 
 ```sh
-pip install comparisce
+pip install compasce
 ```
 
 ## Usage
 
 ```python
-import comparisce as csc
+import compasce as csc
 
 adata = read_h5ad("my_adata.h5ad")
 zarr_path = "my_adata.h5ad.zarr"
@@ -25,7 +30,7 @@ csc.run_all(adata, zarr_path, client=client)
 Or, run functions individually:
 
 ```python
-import comparisce as csc
+import compasce as csc
 
 adata = read_h5ad("my_adata.h5ad")
 zarr_path = "my_adata.h5ad.zarr"
@@ -38,12 +43,20 @@ csc.normalize_basic(ladata)
 csc.normalize_pearson_residuals(ladata)
 ```
 
+## ComparativeData format
+
+We define a ComparativeData object which is a container for AnnData, MuData, and SpatialData objects.
+This format serves as a convention for how to organize pre-computed comparison results.
+
+It will not support all possible comparative use cases, but instead aims to support a set of common use cases that we have identified.
+
+
 
 ## Development
 
 ```sh
-conda create -n comparisce-dev python=3.12
-conda activate comparisce-dev
+conda create -n compasce-dev python=3.12
+conda activate compasce-dev
 pip install -e ".[dev]"
 ```
 
