@@ -8,7 +8,7 @@ from anndata import read_h5ad
 import dask.array as da
 import shutil
 
-import comparisce as csc
+import compasce as csc
 
 DATA_DIR = join("data")
 ADATA_PATH = join(DATA_DIR, "lake_et_al.subset.h5ad")

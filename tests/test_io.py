@@ -9,7 +9,7 @@ from anndata import read_h5ad
 import dask.array as da
 import shutil
 
-import comparisce as csc
+import compasce as csc
 
 from .fixtures import DATA_DIR, adata_fixture, client_fixture
 
