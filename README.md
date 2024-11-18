@@ -55,19 +55,19 @@ The comparative data format, again, is a container Zarr store for existing forma
 my_atlas.cdata.zarr
   - __all__                          # no comparison or filtering
     - cells.adata.zarr             # TODO: also support mudata
-      - uns/compasce           # special metadata, will also be zarr-consolidated
+      - uns/comparasce           # special metadata, will also be zarr-consolidated
           obsType: "cell"
           featureType: "gene"
     - participants.adata.zarr    
-      - uns/compasce
+      - uns/comparasce
         obsType: "participant"
         featureType: "clinical"    
   - compare_celltype.val_b_cell.__rest__
     - ranked_genes.adata.zarr
-      - uns/compasce
+      - uns/comparasce
         featureType: "gene"
     - ranked_pathways.adata.zarr
-      - uns/compasce
+      - uns/comparasce
         featureType: "pathway"
   - compare_celltype.val_cytotoxic_t_cell.__rest__
     - ranked_genes.adata.zarr
@@ -78,36 +78,37 @@ my_atlas.cdata.zarr
     - ranked_genes.adata.zarr
     - ranked_pathways.adata.zarr
   - .zmetadata                              # zarr consolidated metadata
+  - .zattrs                                 # uns-consolidated metadata
 -->
 
 ```
-.
-└── my_atlas.cdata.zarr
-    ├── __all__                          # no comparison or filtering
-    │   ├── cells.adata.zarr             # TODO: also support mudata
-    │   │   └── uns/compasce           # special metadata, will also be zarr-consolidated
-    │   │       ├── obsType: "cell"
-    │   │       └── featureType: "gene"
-    │   └── participants.adata.zarr    
-    │       └── uns/compasce
-    │           ├── obsType: "participant"
-    │           └── featureType: "clinical"    
-    ├── compare_celltype.val_b_cell.__rest__
-    │   ├── ranked_genes.adata.zarr
-    │   │   └── uns/compasce
-    │   │       └── featureType: "gene"
-    │   └── ranked_pathways.adata.zarr
-    │       └── uns/compasce
-    │           └── featureType: "pathway"
-    ├── compare_celltype.val_cytotoxic_t_cell.__rest__
-    │   ├── ranked_genes.adata.zarr
-    │   └── ranked_pathways.adata.zarr
-    ├── compare_disease.val_healthy_reference.val_aki
-    │   └── adata.zarr                         # lemur results
-    ├── filter_celltype.val_fibroblast.compare_disease.val_healthy_reference.val_AKI
-    │   ├── ranked_genes.adata.zarr
-    │   └── ranked_pathways.adata.zarr
-    └── .zmetadata                              # zarr consolidated metadata
+my_atlas.cdata.zarr
+├── __all__                          # no comparison or filtering
+│   ├── cells.adata.zarr             # TODO: also support mudata
+│   │   └── uns/comparasce           # special metadata, will also be zarr-consolidated
+│   │       ├── obsType: "cell"
+│   │       └── featureType: "gene"
+│   └── participants.adata.zarr    
+│       └── uns/comparasce
+│           ├── obsType: "participant"
+│           └── featureType: "clinical"    
+├── compare_celltype.val_b_cell.__rest__
+│   ├── ranked_genes.adata.zarr
+│   │   └── uns/comparasce
+│   │       └── featureType: "gene"
+│   └── ranked_pathways.adata.zarr
+│       └── uns/comparasce
+│           └── featureType: "pathway"
+├── compare_celltype.val_cytotoxic_t_cell.__rest__
+│   ├── ranked_genes.adata.zarr
+│   └── ranked_pathways.adata.zarr
+├── compare_disease.val_healthy_reference.val_aki
+│   └── adata.zarr                         # lemur results
+├── filter_celltype.val_fibroblast.compare_disease.val_healthy_reference.val_AKI
+│   ├── ranked_genes.adata.zarr
+│   └── ranked_pathways.adata.zarr
+├── .zmetadata                              # zarr consolidated metadata
+└── .zattrs                                 # uns-consolidated metadata
 ```
 
 Principles:
