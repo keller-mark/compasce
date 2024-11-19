@@ -129,9 +129,8 @@ Some methods may also have long execution times or high computational resource r
 ## Development
 
 ```sh
-conda create -n compasce-dev python=3.12
-conda activate compasce-dev
-pip install -e ".[dev]"
+uv sync --extra dev
+uv run pytest
 ```
 
 Download example data:

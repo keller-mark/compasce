@@ -1,21 +1,22 @@
 name: Test Python
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   test_python:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        version: ['3.11', '3.12']
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.version }}
-      - name: Install 1
-        run: pip install ".[dev]"
-      - name: Build package
-        run: python -m build
+          version: "latest"
+      - name: Install dev dependencies
+        run: uv sync --extra dev
+      # - name: Build package
+      #   run: python -m build
       - name: Run unit tests
-        run: pytest
+        run: uv run pytest
