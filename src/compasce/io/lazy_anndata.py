@@ -3,8 +3,6 @@ import dask.array as da
 from anndata import AnnData
 from dask.distributed import progress
 
-from anndata._core.aligned_mapping import LayersView
-
 from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone
 
 

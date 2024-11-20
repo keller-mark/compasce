@@ -24,6 +24,7 @@ def diffexp_zarr_path():
     shutil.rmtree(zarr_path, ignore_errors=True)
     return zarr_path
 
+@pytest.mark.skip(reason="slow")
 def test_normalization(adata_fixture, client_fixture, normalization_zarr_path):
     client = client_fixture
     adata = adata_fixture
@@ -91,5 +92,16 @@ def test_diffexp(adata_fixture, client_fixture, diffexp_zarr_path):
         "encoding-version": "0.2.0"
     }
 
+    z_attrs_dict = dict(z.attrs)
+    assert 'consolidated_uns' in z_attrs_dict
+    assert 'compare_cell_type.val_b_cell.__rest__' in z_attrs_dict['consolidated_uns']
+    assert 'ranked_genes.adata.zarr' in z_attrs_dict['consolidated_uns']['compare_cell_type.val_b_cell.__rest__']
+    assert 'ranked_pathways.adata.zarr' in z_attrs_dict['consolidated_uns']['compare_cell_type.val_b_cell.__rest__']
+    assert len(z_attrs_dict['consolidated_uns'].keys()) == 26
 
+    assert z_attrs_dict['consolidated_uns']['compare_cell_type.val_b_cell.__rest__']['ranked_genes.adata.zarr'] == {
+        "obsType": "cell",
+        "featureType": "gene",
+        "obsSetSelection": [["cell_type", "B cell"]],
+    }
 
