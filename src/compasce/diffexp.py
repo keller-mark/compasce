@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from anndata import AnnData
 
+from .constants import COMPASCE_KEY
 
 # TODO: way to specify pairs of groups at sample-level for comparison and their corresponding column
 def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
@@ -23,6 +24,11 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
             "column": cell_type_col,
             "value": cell_type,
         }
+        de_adata.uns[COMPASCE_KEY] = {
+            "obsType": "cell",
+            "featureType": "gene",
+            "obsSetSelection": [[cell_type_col, cell_type]],
+        }
         cdata.create_lazy_anndata(de_adata, dir_name=[("compare", cell_type_col), ("val", cell_type), "__rest__"], name="ranked_genes")
 
         # Compute gene enrichment.
@@ -36,6 +42,11 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
                 "params": ladata.uns[key_added]["params"],
                 "column": cell_type_col,
                 "value": cell_type,
+            }
+            enrichment_adata.uns[COMPASCE_KEY] = {
+                "obsType": "cell",
+                "featureType": "pathway",
+                "obsSetSelection": [[cell_type_col, cell_type]],
             }
             cdata.create_lazy_anndata(enrichment_adata, dir_name=[("compare", cell_type_col), ("val", cell_type), "__rest__"], name="ranked_pathways")
         except AssertionError:

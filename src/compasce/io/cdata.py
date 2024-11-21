@@ -1,9 +1,12 @@
 import zarr
-from os.path import join
+from os.path import join, dirname, basename
 import re
+import glob
+import numpy as np
 
 from .zarr_io import dispatched_write_zarr
 from .lazy_anndata import LazyAnnData
+from ..constants import COMPASCE_KEY
 
 
 def slugify(text):
@@ -31,6 +34,16 @@ def dir_name_to_str(dir_name):
                 result.append(item)
         return ".".join(result)
 
+def simplify_value(val):
+    # AnnData stores list values in uns as numpy arrays,
+    # which cause problems when zarr tries to serialize the dict
+    # for the standard zarr zattrs.
+    if isinstance(val, dict):
+        return {k: simplify_value(v) for k, v in val.items()}
+    elif isinstance(val, np.ndarray):
+        return val.tolist()
+    return val
+
 class ComparativeData:
     def __init__(self, zarr_path, group_pairs=[]):
         self.zarr_path = zarr_path
@@ -45,6 +58,20 @@ class ComparativeData:
         return LazyAnnData(adata_path, client=client)
 
     def update(self):
+        # Merge the dicts saved in /*/*.adata.zarr/uns/compasce, and store them in the root attrs
+        uns_dict = {}
+        adata_paths = glob.glob(join(self.zarr_path, "*", "*.adata.zarr"))
+        for adata_path in adata_paths:
+            adata_name = basename(adata_path)
+            group_name = basename(dirname(adata_path))
+            ladata = LazyAnnData(adata_path)
+            if group_name not in uns_dict:
+                uns_dict[group_name] = {}
+            uns_dict[group_name][adata_name] = simplify_value(ladata.uns.get(COMPASCE_KEY))
+
+        z = zarr.open(self.zarr_path, mode="r+")
+        z.attrs["consolidated_uns"] = uns_dict
+
+        # Conslidate zarr metadata
         zarr.consolidate_metadata(self.zarr_path)
-       
-        # TODO: merge consolidated metadata with the dicts saved in /*/*.adata.zarr/uns/*
+        
