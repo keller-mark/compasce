@@ -51,6 +51,8 @@ It will not support all possible comparative use cases, but instead aims to supp
 
 The ComparativeData object, on-disk, is a container Zarr store for existing formats from the scverse ecosystem, which themselves can also be stored via Zarr, leveraging the hierarchy of groups/arrays concepts.
 
+**Note**: this format is subject to change as we gain experience using it downstream for visualization purposes or through other feedback.
+
 <!-- raw text for https://tree.nathanfriend.com
 my_atlas.cdata.zarr
   - __all__                          # no comparison or filtering
