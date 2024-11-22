@@ -5,7 +5,7 @@ from anndata import AnnData
 
 from .constants import COMPASCE_KEY
 
-# TODO: way to specify pairs of groups at sample-level for comparison and their corresponding column
+# TODO: pass in pairs of groups at sample-level for comparison and their corresponding column
 def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
     key_added = "rank_genes_groups"
     sc.tl.rank_genes_groups(ladata, groupby=cell_type_col, method="wilcoxon", layer="logcounts", key_added=key_added)
@@ -55,7 +55,8 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
     del ladata.uns[key_added]
     
 
-    # TODO: within cell type (case vs control)
+    # TODO: within cell type (case vs. control)
+    # TODO: within cell type (inside spatial region vs. outside)
 
     cdata.update()
 
