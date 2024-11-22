@@ -32,7 +32,7 @@ dependencies = [
   'dask-ml',
   'distributed',
   'joblib',
-  'scikit-learn',
+  'scikit-learn>=1.5.1',
   'zarr',
   'gprofiler-official'
 ]
