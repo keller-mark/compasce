@@ -8,7 +8,7 @@ Data processing functions to support visual comparisons of single-cell data.
 :warning: Work in progress
 
 
-
+<!--
 ## Installation
 
 ```sh
@@ -43,6 +43,8 @@ csc.normalize_basic(ladata)
 csc.normalize_pearson_residuals(ladata)
 ```
 
+-->
+
 ## ComparativeData format
 
 We define a ComparativeData object which is a container for AnnData, MuData, and SpatialData objects.
@@ -57,7 +59,7 @@ The ComparativeData object, on-disk, is a container Zarr store for existing form
 my_atlas.cdata.zarr
   - __all__                          # no comparison or filtering
     - cells.adata.zarr             # TODO: also support mudata
-      - uns/comparasce           # special metadata, will also be zarr-consolidated
+      - uns/comparasce           # special metadata, will be uns-consolidated
           obsType: "cell"
           featureType: "gene"
     - participants.adata.zarr    
@@ -87,7 +89,7 @@ my_atlas.cdata.zarr
 my_atlas.cdata.zarr
 ├── __all__                          # no comparison or filtering
 │   ├── cells.adata.zarr             # TODO: also support mudata
-│   │   └── uns/comparasce           # special metadata, will also be zarr-consolidated
+│   │   └── uns/comparasce           # special metadata, will be uns-consolidated
 │   │       ├── obsType: "cell"
 │   │       └── featureType: "gene"
 │   └── participants.adata.zarr    

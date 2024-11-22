@@ -3,6 +3,7 @@ from os.path import join, dirname, basename
 import re
 import glob
 import numpy as np
+from anndata import AnnData
 
 from .zarr_io import dispatched_write_zarr
 from .lazy_anndata import LazyAnnData
@@ -45,17 +46,40 @@ def simplify_value(val):
     return val
 
 class ComparativeData:
-    def __init__(self, zarr_path, group_pairs=[]):
+    def __init__(self, zarr_path, sample_group_pairs=None, sample_id_col=None):
         self.zarr_path = zarr_path
         # Zarr open_consolidated will fail unless the root contains a group.
-        zarr.open(zarr_path, mode="a")
-        self.group_pairs = []
+        z = zarr.open(zarr_path, mode="a")
+        # TODO: is this the best way to do this?
+
+        z.attrs["sample_group_pairs"] = sample_group_pairs
+        z.attrs["sample_id_col"] = sample_id_col
+        self.z = z
     
     def create_lazy_anndata(self, adata, dir_name="__all__", name=None, arr_path=None, mode="w", client=None):
         adata_path = join(self.zarr_path, dir_name_to_str(dir_name), f"{name}.adata.zarr" if name is not None else "adata.zarr")
         dispatched_write_zarr(adata, adata_path, arr_path=arr_path, mode=mode, client=client)
 
         return LazyAnnData(adata_path, client=client)
+    
+    def create_sample_anndata(self, ladata):
+        sample_id_col = self.z.attrs["sample_id_col"]
+        assert sample_id_col in ladata.obs.columns
+        sample_groupby = ladata.obs.groupby(by=sample_id_col)
+        per_sample_obs_cols_nunique = sample_groupby.nunique()
+        # Find columns whose values are only at most one unique value per sample.
+        sample_cols = []
+        for col in per_sample_obs_cols_nunique.columns:
+            if len(per_sample_obs_cols_nunique[col].unique()) == 1 and per_sample_obs_cols_nunique[col].unique()[0] == 1:
+                sample_cols.append(col)
+        
+        sample_df = sample_groupby.first()[sample_cols]
+        sample_adata = AnnData(X=None, var=None, obs=sample_df)
+        sample_adata.uns[COMPASCE_KEY] = {
+            "obsType": "sample",
+        }
+        return self.create_lazy_anndata(sample_adata, name="sample")
+
 
     def update(self):
         # Merge the dicts saved in /*/*.adata.zarr/uns/compasce, and store them in the root attrs

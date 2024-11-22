@@ -32,6 +32,9 @@ class MappingWrapper:
     def __getattr__(self, key):
         return getattr(self.mapping, key)
 
+    def __delitem__(self, key):
+        del self.mapping[key]
+
 class LazyAnnData(AnnData):
 
     zarr_path = None
@@ -143,7 +146,8 @@ class LazyAnnData(AnnData):
         residuals_delayed = X_dask.to_zarr(url=self.zarr_path, component=X_path, overwrite=True, compute=False)
         residuals_future = self.client.persist(residuals_delayed)
 
-        progress(residuals_future)
+        progress(residuals_future, notebook=False)
+        #future_result = residuals_future.compute()
 
         write_zdone(self.zarr_path, arr_path=["layers", layer_key])
 
