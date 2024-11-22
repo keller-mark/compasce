@@ -59,19 +59,19 @@ The ComparativeData object, on-disk, is a container Zarr store for existing form
 my_atlas.cdata.zarr
   - __all__                          # no comparison or filtering
     - cells.adata.zarr             # TODO: also support mudata
-      - uns/comparasce           # special metadata, will be uns-consolidated
+      - uns/compasce           # special metadata, will be uns-consolidated
           obsType: "cell"
           featureType: "gene"
     - participants.adata.zarr    
-      - uns/comparasce
+      - uns/compasce
         obsType: "participant"
         featureType: "clinical"    
   - compare_celltype.val_b_cell.__rest__
     - ranked_genes.adata.zarr
-      - uns/comparasce
+      - uns/compasce
         featureType: "gene"
     - ranked_pathways.adata.zarr
-      - uns/comparasce
+      - uns/compasce
         featureType: "pathway"
   - compare_celltype.val_cytotoxic_t_cell.__rest__
     - ranked_genes.adata.zarr
@@ -89,19 +89,19 @@ my_atlas.cdata.zarr
 my_atlas.cdata.zarr
 ├── __all__                          # no comparison or filtering
 │   ├── cells.adata.zarr             # TODO: also support mudata
-│   │   └── uns/comparasce           # special metadata, will be uns-consolidated
+│   │   └── uns/compasce           # special metadata, will be uns-consolidated
 │   │       ├── obsType: "cell"
 │   │       └── featureType: "gene"
 │   └── participants.adata.zarr    
-│       └── uns/comparasce
+│       └── uns/compasce
 │           ├── obsType: "participant"
 │           └── featureType: "clinical"    
 ├── compare_celltype.val_b_cell.__rest__
 │   ├── ranked_genes.adata.zarr
-│   │   └── uns/comparasce
+│   │   └── uns/compasce
 │   │       └── featureType: "gene"
 │   └── ranked_pathways.adata.zarr
-│       └── uns/comparasce
+│       └── uns/compasce
 │           └── featureType: "pathway"
 ├── compare_celltype.val_cytotoxic_t_cell.__rest__
 │   ├── ranked_genes.adata.zarr
