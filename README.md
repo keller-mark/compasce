@@ -8,7 +8,7 @@ Data processing functions to support visual comparisons of single-cell data.
 :warning: Work in progress
 
 
-
+<!--
 ## Installation
 
 ```sh
@@ -42,6 +42,8 @@ ladata = csc.io.create_lazy_anndata(adata, zarr_path, client=client)
 csc.normalize_basic(ladata)
 csc.normalize_pearson_residuals(ladata)
 ```
+
+-->
 
 ## ComparativeData format
 
