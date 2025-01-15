@@ -11,7 +11,7 @@ authors = [
 description = "Preprocessing functions that support comparison of single-cell data"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["single-cell"]
 classifiers = [
   'Development Status :: 4 - Beta',
@@ -34,7 +34,8 @@ dependencies = [
   'joblib',
   'scikit-learn>=1.5.1',
   'zarr',
-  'gprofiler-official'
+  'gprofiler-official',
+  'pylemur @ git+https://github.com/keller-mark/pyLemur@keller-mark/more-dask-and-merge',
 ]
 
 [project.optional-dependencies]
@@ -44,7 +45,7 @@ dev = [
   'pytest-memray',
   'flake8==3.8.4',
   'jupyterlab',
-  'snakemake',
+  #'snakemake',
   'pertpy',
   'requests',
   'altair',
@@ -71,3 +72,4 @@ pythonpath = [
 
 [tool.hatch.metadata]
 allow-direct-references = true
+

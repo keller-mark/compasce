@@ -1,6 +1,7 @@
 from .normalization import normalize_basic, normalize_pearson_residuals
 from .densmap import densmap
 from .diffexp import compute_diffexp
+from .lemur import compute_lemur
 from .io.cdata import ComparativeData
 from .constants import COMPASCE_KEY
 
@@ -44,6 +45,7 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
 
     # depends on: uns/write_metadata/layers/counts
     # creates: uns/write_metadata/layers/logcounts
+    
     normalize_basic(ladata)
 
     del ladata.layers["counts"]
@@ -60,9 +62,8 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
     # creates: varm/DE_cell_type_vs_rest
     compute_diffexp(cdata, ladata)
 
+
     
-    # for group_pair in group_pairs:
-    #     compute_diffexp(ladata, group_pair)
-    #     compute_lemur(cdata, group_pair)
+    compute_lemur(cdata, ladata)
 
     return True
