@@ -18,6 +18,9 @@ class MappingWrapper:
     def __getitem__(self, key):
         # TODO: return zarr array that 
         return self.mapping[key]
+
+    def __contains__(self, key):
+        return key in self.mapping
     
     def __setitem__(self, key, value):
         # assumes 2D
