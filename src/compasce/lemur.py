@@ -27,8 +27,10 @@ def compute_lemur(cdata, ladata):
 
         # Recalculate the DensMAP on the embedding calculated by LEMUR
         ladata.obsm["lemur_embedding"] = model.embedding
-        sc.pp.neighbors(ladata, use_rep="lemur_embedding")
-        sc.tl.densmap(ladata, key_added="lemur_densmap")
+        ladata.save(arr_path=["obsm", "lemur_embedding"])
+
+        sc.pp.neighbors(ladata, use_rep="lemur_embedding", n_neighbors=30, key_added="lemur_embedding_neighbors")
+        sc.tl.umap(ladata, method="densmap", key_added="lemur_densmap", neighbors_key="lemur_embedding_neighbors")
 
         # Store results in a new AnnData object.
         # TODO: copy over obs/var index columns?
@@ -39,8 +41,5 @@ def compute_lemur(cdata, ladata):
             "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
         }
         cdata.create_lazy_anndata(lemur_adata, dir_name=[("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)], name="lemur")
-
-        del ladata.obsm["lemur_embedding"]
-        del ladata.obsm["lemur_densmap"]
 
     return ladata
