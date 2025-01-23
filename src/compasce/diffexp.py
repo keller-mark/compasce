@@ -11,6 +11,8 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
     sc.tl.rank_genes_groups(ladata, groupby=cell_type_col, method="wilcoxon", layer="logcounts", key_added=key_added)
 
     cell_types = ladata.obs[cell_type_col].unique().tolist()
+    cell_types = [x for x in cell_types if pd.notna(x)]
+
     for cell_type in cell_types:
         df = sc.get.rank_genes_groups_df(ladata, group=cell_type, key=key_added)
         df = df.sort_values(by="pvals_adj", ascending=False)

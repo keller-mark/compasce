@@ -4,3 +4,4 @@ from .normalization import normalize_basic, normalize_pearson_residuals, _normal
 from .pipeline import run_all
 from .diffexp import compute_diffexp
 from .constants import COMPASCE_KEY
+from .lemur import compute_lemur

@@ -36,6 +36,7 @@ dependencies = [
   'zarr',
   'gprofiler-official',
   'pylemur @ git+https://github.com/keller-mark/pyLemur@keller-mark/more-dask-and-merge',
+  "mudata==0.3.1",
 ]
 
 [project.optional-dependencies]

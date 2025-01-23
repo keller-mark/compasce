@@ -6,7 +6,7 @@ from .io.cdata import ComparativeData
 from .constants import COMPASCE_KEY
 
 
-def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_pairs=None):
+def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_pairs=None, cell_type_col="cell_type"):
     """
     def get_adata():
         return read_h5ad("path/to/adata.h5ad")
@@ -45,11 +45,11 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
 
     # depends on: uns/write_metadata/layers/counts
     # creates: uns/write_metadata/layers/logcounts
-    
     normalize_basic(ladata)
 
     del ladata.layers["counts"]
 
+    
     # depends on: uns/write_metadata/layers/counts
     # creates: /layers/pearson_residuals
     normalize_pearson_residuals(ladata)
@@ -60,10 +60,8 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
 
     # depends on: uns/write_metadata/layers/logcounts
     # creates: varm/DE_cell_type_vs_rest
-    compute_diffexp(cdata, ladata)
-
-
+    compute_diffexp(cdata, ladata, cell_type_col=cell_type_col)
     
     compute_lemur(cdata, ladata)
 
-    return True
+    return (cdata, ladata)
