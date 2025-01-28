@@ -3,33 +3,33 @@ import pandas as pd
 import numpy as np
 from anndata import AnnData
 
-from .constants import COMPASCE_KEY
-
-
-def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
+def compute_diffexp(ladata, cm):
     key_added = "rank_genes_groups"
+    cell_type_col = cm.cell_type_col
+    print(f"Running diffexp tests for cell types vs rest")
     sc.tl.rank_genes_groups(ladata, groupby=cell_type_col, method="wilcoxon", layer="logcounts", key_added=key_added)
 
     cell_types = ladata.obs[cell_type_col].unique().tolist()
     cell_types = [x for x in cell_types if pd.notna(x)]
 
     for cell_type in cell_types:
+        print(f"Getting diffexp test results for {cell_type} vs rest")
+        cmp = cm.add_comparison([("compare", cell_type_col), ("val", cell_type), "__rest__"])
+
         df = sc.get.rank_genes_groups_df(ladata, group=cell_type, key=key_added)
         df = df.sort_values(by="pvals_adj", ascending=False)
 
-        # Store results in a new AnnData object's var dataframe.
-        de_adata = AnnData(X=None, obs=None, var=df)
-        de_adata.uns[key_added] = {
-            "params": ladata.uns[key_added]["params"],
-            "column": cell_type_col,
-            "value": cell_type,
-        }
-        de_adata.uns[COMPASCE_KEY] = {
+        uns_key = cmp.append_df("uns", "rank_genes_groups", {
+            "rank_genes_groups": ladata.uns[key_added]["params"],
+            "rank_genes_groups_df": {
+                "group": cell_type,   
+            },
+        }, {
             "obsType": "cell",
             "featureType": "gene",
             "obsSetSelection": [[cell_type_col, cell_type]],
-        }
-        cdata.create_lazy_anndata(de_adata, dir_name=[("compare", cell_type_col), ("val", cell_type), "__rest__"], name="ranked_genes")
+        })
+        ladata.uns[uns_key] = df
 
         # Compute gene enrichment.
         try:
@@ -37,19 +37,19 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
             enrichment_df = sc.queries.enrich(ladata, group=cell_type, log2fc_min=2, pval_cutoff=.01)
             enrichment_df = enrichment_df.drop(columns=["query", "parents"])
             
-            # Store results in a new AnnData object's var dataframe.
-            enrichment_adata = AnnData(X=None, obs=None, var=enrichment_df)
-            enrichment_adata.uns[key_added + "_enrich"] = {
-                "params": ladata.uns[key_added]["params"],
-                "column": cell_type_col,
-                "value": cell_type,
-            }
-            enrichment_adata.uns[COMPASCE_KEY] = {
+            uns_key = cmp.append_df("uns", "enrich", {
+                "rank_genes_groups": ladata.uns[key_added]["params"],
+                "enrich": {
+                    "group": cell_type,
+                    "log2fc_min": 2,
+                    "pval_cutoff": .01
+                },
+            }, {
                 "obsType": "cell",
                 "featureType": "pathway",
                 "obsSetSelection": [[cell_type_col, cell_type]],
-            }
-            cdata.create_lazy_anndata(enrichment_adata, dir_name=[("compare", cell_type_col), ("val", cell_type), "__rest__"], name="ranked_pathways")
+            })
+            ladata.uns[uns_key] = enrichment_df
         except AssertionError:
             print(f"Gene enrichment query failed for cell type {cell_type}")
     
@@ -57,35 +57,34 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
     
 
     # Within cell type (case vs. control)
-    sample_group_pairs = cdata.sample_group_pairs
+    sample_group_pairs = cm.sample_group_pairs
 
     for cell_type in cell_types:
+        print(f"Running diffexp test for {cell_type} and sample group pairs")
         for sample_group_pair in sample_group_pairs:
 
+            sample_group_col, (sample_group_left, sample_group_right) = sample_group_pair
+            cmp = cm.add_comparison([("filter", cell_type_col), ("val", cell_type), ("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)])
             try:
-                sample_group_col, (sample_group_left, sample_group_right) = sample_group_pair
                 ladata.obs["cell_type_sample_group"] = ladata.obs[cell_type_col].astype(str) + "_" + ladata.obs[sample_group_col].astype(str)
-
                 sc.tl.rank_genes_groups(ladata, groupby="cell_type_sample_group", groups=[f"{cell_type}_{sample_group_right}"], reference=f"{cell_type}_{sample_group_left}", method="wilcoxon", layer="logcounts", key_added=key_added)
 
                 df = sc.get.rank_genes_groups_df(ladata, group=f"{cell_type}_{sample_group_right}", key=key_added)
                 df = df.sort_values(by="pvals_adj", ascending=False)
 
-                # Store results in a new AnnData object's var dataframe.
-                de_adata = AnnData(X=None, obs=None, var=df)
-                de_adata.uns[key_added] = {
-                    "params": ladata.uns[key_added]["params"],
-                    "column": cell_type_col,
-                    "value": cell_type,
-                }
-                de_adata.uns[COMPASCE_KEY] = {
+                uns_key = cmp.append_df("uns", "rank_genes_groups", {
+                    "rank_genes_groups": ladata.uns[key_added]["params"],
+                    "rank_genes_groups_df": {
+                        "group": cell_type,   
+                    },
+                }, {
                     "obsType": "cell",
                     "featureType": "gene",
                     "obsSetFilter": [[cell_type_col, cell_type]],
                     "sampleSetSelection": [[sample_group_col, sample_group_right]],
                     "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
-                }
-                cdata.create_lazy_anndata(de_adata, dir_name=[("filter", cell_type_col), ("val", cell_type), ("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)], name="ranked_genes")
+                })
+                ladata.uns[uns_key] = df
 
                 # Compute gene enrichment.
                 try:
@@ -93,21 +92,19 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
                     enrichment_df = sc.queries.enrich(ladata, group=f"{cell_type}_{sample_group_right}", log2fc_min=2, pval_cutoff=.01, key=key_added)
                     enrichment_df = enrichment_df.drop(columns=["query", "parents"])
                     
-                    # Store results in a new AnnData object's var dataframe.
-                    enrichment_adata = AnnData(X=None, obs=None, var=enrichment_df)
-                    enrichment_adata.uns[key_added + "_enrich"] = {
-                        "params": ladata.uns[key_added]["params"],
-                        "column": cell_type_col,
-                        "value": cell_type,
-                    }
-                    enrichment_adata.uns[COMPASCE_KEY] = {
+                    uns_key = cmp.append_df("uns", "enrich", {
+                        "rank_genes_groups": ladata.uns[key_added]["params"],
+                        "enrich": {
+                            "group": cell_type,
+                            "log2fc_min": 2,
+                            "pval_cutoff": .01
+                        },
+                    }, {
                         "obsType": "cell",
                         "featureType": "pathway",
-                        "obsSetFilter": [[cell_type_col, cell_type]],
-                        "sampleSetSelection": [[sample_group_col, sample_group_right]],
-                        "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
-                    }
-                    cdata.create_lazy_anndata(enrichment_adata, dir_name=[("filter", cell_type_col), ("val", cell_type), ("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)], name="ranked_pathways")
+                        "obsSetSelection": [[cell_type_col, cell_type]],
+                    })
+                    ladata.uns[uns_key] = enrichment_df
                 except AssertionError:
                     print(f"Gene enrichment query failed for cell type {cell_type} and sample group pair {sample_group_pair}")
 
@@ -116,7 +113,5 @@ def compute_diffexp(cdata, ladata, cell_type_col="cell_type"):
                 print(f"Error: likely due to insufficient data for comparison for {cell_type} and sample group pair {sample_group_pair}")
 
     # TODO: within cell type (inside spatial region vs. outside)
-
-    cdata.update()
 
     return ladata

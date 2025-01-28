@@ -161,3 +161,18 @@ def create_lazy_anndata(adata, zarr_path, client=None):
     dispatched_write_zarr(adata, zarr_path, arr_path=["layers", "counts"], mode="w", client=client)
 
     return LazyAnnData(zarr_path, client=client)
+
+
+def create_sample_df(adata, cm):
+    sample_id_col = cm.sample_id_col
+    assert sample_id_col in adata.obs.columns
+    sample_groupby = adata.obs.groupby(by=sample_id_col)
+    per_sample_obs_cols_nunique = sample_groupby.nunique()
+    # Find columns whose values are only at most one unique value per sample.
+    sample_cols = []
+    for col in per_sample_obs_cols_nunique.columns:
+        if len(per_sample_obs_cols_nunique[col].unique()) == 1 and per_sample_obs_cols_nunique[col].unique()[0] == 1:
+            sample_cols.append(col)
+    
+    sample_df = sample_groupby.first()[sample_cols]
+    return sample_df
