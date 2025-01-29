@@ -2,24 +2,23 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 from anndata import AnnData
-
 import pylemur
 
-from .constants import COMPASCE_KEY
 
+def compute_lemur(ladata, cm):
 
-def compute_lemur(cdata, ladata):
-
-    sample_group_pairs = cdata.sample_group_pairs
+    sample_group_pairs = cm.sample_group_pairs
 
     def get_input_arr():
         return ladata.get_da_from_zarr_layer("logcounts")
 
     for sample_group_pair in sample_group_pairs:
         sample_group_col, (sample_group_left, sample_group_right) = sample_group_pair
+        cmp = cm.add_comparison([("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)])
+
         model = pylemur.tl.LEMUR(ladata, get_input_arr, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
         model.fit()
-        model.align_with_harmony(max_iter=3) # TODO: remove this max_iter param
+        model.align_with_harmony()
 
         ctrl_pred = model.predict(new_condition=model.cond(**{ sample_group_col: sample_group_left }))
         stim_pred = model.predict(new_condition=model.cond(**{ sample_group_col: sample_group_right }))
@@ -35,14 +34,31 @@ def compute_lemur(cdata, ladata):
         sc.pp.neighbors(ladata, n_neighbors=30, use_rep="X", key_added="lemur_embedding_neighbors")
         sc.tl.umap(ladata, method="densmap", key_added="lemur_densmap", neighbors_key="lemur_embedding_neighbors")
 
-        # Store results in a new AnnData object.
-        # TODO: copy over obs/var index columns?
-        lemur_adata = AnnData(X=lemur_diff_matrix, obs=None, var=None, obsm={"X_densmap": ladata.obsm["lemur_densmap"]})
-        lemur_adata.uns[COMPASCE_KEY] = {
+        method_params = {
+            "design": f"~ {sample_group_col}",
+            "n_embedding": 15,
+            "layer": "logcounts"
+        }
+        # Store the results
+        layer_key = cmp.append_df("layers", "lemur_diff", method_params, {
             "obsType": "cell",
             "featureType": "gene",
             "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
-        }
-        cdata.create_lazy_anndata(lemur_adata, dir_name=[("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)], name="lemur")
+        })
+        ladata.layers[layer_key] = lemur_diff_matrix
+
+        obsm_key = cmp.append_df("obsm", "lemur_embedding", method_params, {
+            "obsType": "cell",
+            "featureType": "gene",
+            "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
+        })
+        ladata.obsm[obsm_key] = model.embedding
+
+        obsm_key = cmp.append_df("obsm", "lemur_densmap", method_params, {
+            "obsType": "cell",
+            "featureType": "gene",
+            "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
+        })
+        ladata.obsm[obsm_key] = ladata.obsm["lemur_densmap"]
 
     return ladata

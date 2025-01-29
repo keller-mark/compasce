@@ -1,6 +1,7 @@
 from .normalization import normalize_basic, normalize_pearson_residuals
 from .densmap import densmap
 from .diffexp import compute_diffexp
+from .diffabundance import compute_diffabundance
 from .lemur import compute_lemur
 from .io.lazy_anndata import create_lazy_anndata, create_sample_df
 from .io.comparison_metadata import MultiComparisonMetadata
@@ -62,14 +63,17 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
 
     densmap(ladata)
 
-    # depends on: uns/write_metadata/layers/logcounts
-    # creates: varm/DE_cell_type_vs_rest
     compute_diffexp(ladata, cm)
-    
-    #compute_lemur(cdata, ladata)
 
+    ladata.uns["comparison_metadata"] = cm.serialize()
+    ladata.save()
 
-    # TODO: scCODA
+    compute_diffabundance(ladata, cm)
+
+    ladata.uns["comparison_metadata"] = cm.serialize()
+    ladata.save()
+
+    compute_lemur(ladata, cm)
 
     ladata.uns["comparison_metadata"] = cm.serialize()
     ladata.save()

@@ -1,6 +1,20 @@
-from os.path import join
 import json
+import numpy as np
+from os.path import join
 from .cdata import dir_name_to_str
+
+
+# Reference: https://stackoverflow.com/a/57915246
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+
 
 # See https://observablehq.com/d/e7c03bf319f20f86
 class ComparisonMetadata:

@@ -4,9 +4,11 @@ import numpy as np
 from anndata import AnnData
 
 def compute_diffexp(ladata, cm):
-    key_added = "rank_genes_groups"
-    cell_type_col = cm.cell_type_col
     print(f"Running diffexp tests for cell types vs rest")
+
+    cell_type_col = cm.cell_type_col
+
+    key_added = "rank_genes_groups"
     sc.tl.rank_genes_groups(ladata, groupby=cell_type_col, method="wilcoxon", layer="logcounts", key_added=key_added)
 
     cell_types = ladata.obs[cell_type_col].unique().tolist()
