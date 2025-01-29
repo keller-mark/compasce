@@ -27,9 +27,7 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
     )
 
     all_cmp = cm.add_comparison("__all__")
-    all_cmp.append_df("cells", "adata", None, {
-        "obsType": "cell"
-    })
+    # all_cmp.append_df("uns", "cells", None, { "obsType": "cell" }) # assumed
 
     if "counts" not in adata.layers:
         raise ValueError("adata.layers['counts'] must exist")
@@ -43,7 +41,7 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
     del adata
 
     sample_df = create_sample_df(ladata, cm)
-    uns_key = all_cmp.append_df("samples", "adata", None, {
+    uns_key = all_cmp.append_df("uns", "samples", None, {
         "obsType": "sample"
     })
     ladata.uns[uns_key] = sample_df
