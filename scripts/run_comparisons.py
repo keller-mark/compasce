@@ -26,15 +26,36 @@ if __name__ == "__main__":
         else:
             adata.layers["counts"] = adata.raw.X.todense()
         adata.raw = None
+
+        # Cleanup of sample-level data
+        # Reference samples are mapped to the empty string in the PrimaryAdjudicatedCategory column
+        adata.obs["PrimaryAdjudicatedCategory"] = adata.obs["PrimaryAdjudicatedCategory"].apply(lambda v: "Reference" if v == "" else v)
+        adata.obs["EnrollementCategoryAlt"] = adata.obs["EnrollementCategory"].apply(lambda v: "Reference" if v in ["LD", "HRT"] else v)
         return adata
 
     # For KPMP_PREMIERE....h5ad
     sample_id_col = "SampleID"
     sample_group_pairs = [
+        # AKI vs. HRT
+        ('EnrollementCategoryAlt', ('Reference', 'AKI')),
+        # AKI vs. H-CKD
+        ('EnrollementCategoryAlt', ('AKI', 'H-CKD')),
+        # D-CKD vs. HRT
+        ('EnrollementCategoryAlt', ('DKD', 'Reference')),
+        ('PrimaryAdjudicatedCategory', ('Diabetic Kidney Disease', 'Reference')),
+        # Acute tubular injury vs. HRT
+        ('PrimaryAdjudicatedCategory', ('Acute Tubular Injury', 'Reference')),
+        # Acute interstitial nephritis vs. HRT
+        ('PrimaryAdjudicatedCategory', ('Acute Interstitial Nephritis', 'Reference')),
+        # Diabetes CKD vs. Hypertension CKD
+        ('EnrollementCategoryAlt', ('DKD', 'H-CKD')),
+        ('PrimaryAdjudicatedCategory', ('Diabetic Kidney Disease', 'Hypertensive Kidney Disease')),
+        # ATN vs. AIN
+        ('PrimaryAdjudicatedCategory', ('Acute Interstitial Nephritis', 'Acute Tubular Injury')),
+        # Broader categories
         ('diseasetype', ('Reference', 'AKI')),
         ('diseasetype', ('CKD', 'AKI')),
         ('diseasetype', ('Reference', 'CKD')),
-        # TODO: expand? use adjudicated?
     ]
 
     ladata = run_all(

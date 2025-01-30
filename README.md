@@ -175,8 +175,16 @@ cd -
 ```sh
 uv run python scripts/run_comparisons.py \
   --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
+  --output $DATA_DIR/processed/kpmp_premiere_small.adata.zarr \
+  --subset True \
+  --mem-limit 2GB
+```
+
+```sh
+uv run python scripts/run_comparisons.py \
+  --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
   --output $DATA_DIR/processed/kpmp_premiere.adata.zarr \
-  --subset True
+  --subset False
 ```
 
 ### Testing
