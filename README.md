@@ -45,6 +45,9 @@ csc.normalize_pearson_residuals(ladata)
 
 -->
 
+
+
+<!--
 ## ComparativeData format
 
 We define a ComparativeData object which is a container for AnnData, MuData, and SpatialData objects.
@@ -54,7 +57,7 @@ It will not support all possible comparative use cases, but instead aims to supp
 The ComparativeData object, on-disk, is a container Zarr store for existing formats from the scverse ecosystem, which themselves can also be stored via Zarr, leveraging the hierarchy of groups/arrays concepts.
 
 **Note**: this format is subject to change as we gain experience using it downstream for visualization purposes or through other feedback.
-
+-->
 <!-- raw text for https://tree.nathanfriend.com
 my_atlas.cdata.zarr
   - __all__                          # no comparison or filtering
@@ -85,6 +88,7 @@ my_atlas.cdata.zarr
   - .zattrs                                 # uns-consolidated metadata
 -->
 
+<!--
 ```
 my_atlas.cdata.zarr
 ├── __all__                          # no comparison or filtering
@@ -115,6 +119,7 @@ my_atlas.cdata.zarr
 └── .zattrs                                 # uns-consolidated metadata
 ```
 
+
 Principles:
 - The intermediate directory names should follow a formula, but are primarily meant to be human readable (as opposed to machine readable). Downstream apps/tools should not rely on these names (but may rely on the names of the leaf `*.zarr` sub-sub-directories).
 - Machine-readable metadata should be stored in the `uns/compasce` dictionaries, which are then consolidated into `/.zattrs` in the root of the `.cdata.zarr` store.
@@ -127,7 +132,7 @@ These approaches work well when plots are generated using python and but we need
 Another alternative would be to port the comparative methods to webassembly or javascript but this space of methods moves very rapidly and porting/compilation is often not trivial.
 For example, methods may have long execution times or high computational resource requirements, complicating a porting approach.
 
-
+-->
 
 ## Development
 
@@ -136,6 +141,7 @@ uv sync --extra dev
 uv run pytest
 ```
 
+<!-->
 Download example data:
 
 ```sh
@@ -148,6 +154,29 @@ Create a subset of example data:
 python ./scripts/subset_h5ad.py \
     --input ./data/lake_et_al.full.h5ad \
     --output ./data/lake_et_al.subset.h5ad
+```
+-->
+
+## Run
+
+
+```sh
+export DATA_DIR=/n/data1/hms/dbmi/gehlenborg/lab/scmd-analysis
+```
+
+<!--
+```sh
+cd $DATA_DIR/raw
+curl -L -o KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad "https://storage.googleapis.com/vitessce-demo-data/kpmp-jan-2025/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad"
+cd -
+```
+-->
+
+```sh
+uv run python scripts/run_comparisons.py \
+  --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
+  --output $DATA_DIR/processed/kpmp_premiere.adata.zarr \
+  --subset True
 ```
 
 ### Testing

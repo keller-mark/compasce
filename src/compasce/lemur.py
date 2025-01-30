@@ -33,7 +33,9 @@ def compute_lemur(ladata, cm):
 
         sc.pp.neighbors(ladata, n_neighbors=30, use_rep="X", key_added="lemur_embedding_neighbors")
         sc.tl.umap(ladata, method="densmap", key_added="lemur_densmap", neighbors_key="lemur_embedding_neighbors")
-
+        
+        ladata.save(arr_path=["obsm", "lemur_densmap"])
+        
         method_params = {
             "design": f"~ {sample_group_col}",
             "n_embedding": 15,
