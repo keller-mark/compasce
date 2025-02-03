@@ -64,12 +64,6 @@ class LazyAnnData(AnnData):
 
         self.done_init = True
     
-    def has_dir(self, on_disk_path):
-        # TODO: check for a .zdone file instead
-        if os.path.isdir(join(self.zarr_path, *on_disk_path)):
-            return True
-        return False
-    
     def has_zdone(self, arr_path):
         return io_has_zdone(self.zarr_path, arr_path=arr_path)
 

@@ -159,6 +159,11 @@ python ./scripts/subset_h5ad.py \
 
 ## Run
 
+```sh
+srun -p interactive --pty -t 11:00:00 -n 4 --mem 120G bash
+```
+
+
 
 ```sh
 export DATA_DIR=/n/data1/hms/dbmi/gehlenborg/lab/scmd-analysis
