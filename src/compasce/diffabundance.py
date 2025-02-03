@@ -9,6 +9,10 @@ from pertpy.tools._coda._sccoda import Sccoda
 def compute_diffabundance(ladata, cm):
     print(f"Running diff abundance tests")
 
+    # Check for a .zdone file
+    if ladata.has_zdone(["uns", "compute_diffabundance"]):
+        return ladata
+
     cell_type_col = cm.cell_type_col
     sample_group_pairs = cm.sample_group_pairs
     sample_id_col = cm.sample_id_col
@@ -72,3 +76,6 @@ def compute_diffabundance(ladata, cm):
             "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
         })
         ladata.uns[uns_key] = effect_df
+    
+    ladata.write_zdone(["uns", "compute_diffabundance"])
+    return ladata

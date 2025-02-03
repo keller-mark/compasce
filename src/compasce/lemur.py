@@ -7,6 +7,9 @@ import pylemur
 
 def compute_lemur(ladata, cm):
 
+    if ladata.has_zdone(["uns", "compute_lemur"]):
+        return ladata
+
     sample_group_pairs = cm.sample_group_pairs
 
     def get_input_arr():
@@ -76,5 +79,7 @@ def compute_lemur(ladata, cm):
                 "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
             })
             ladata.layers[layer_key] = lemur_diff_matrix
+    
+    ladata.write_zdone(["uns", "compute_lemur"])
 
     return ladata

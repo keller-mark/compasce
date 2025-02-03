@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import zarr
 from os.path import join
 from .cdata import dir_name_to_str
 
@@ -50,15 +51,21 @@ class MultiComparisonMetadata:
         self.sample_group_pairs = sample_group_pairs
         self.sample_id_col = sample_id_col
         self.cell_type_col = cell_type_col
-        
+        self._prev_comparisons_dict = dict()
     
+    def load_state(self, zarr_path):
+        z = zarr.open(zarr_path, mode="r+")
+        if "/uns/comparison_metadata" in z:
+            prev = json.loads(z["/uns/comparison_metadata"])
+            self._prev_comparisons_dict = prev["comparisons"]
+
     def add_comparison(self, comparison_key):
         c = ComparisonMetadata(comparison_key)
         self._comparisons.append(c)
         return c
     
     def serialize(self):
-        comparisons_dict = dict()
+        comparisons_dict = self._prev_comparisons_dict
         for c in self._comparisons:
             comparisons_dict.update(c.get_dict())
         return json.dumps({

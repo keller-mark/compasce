@@ -1,9 +1,11 @@
+import os
+from os.path import join
 import zarr
 import dask.array as da
 from anndata import AnnData
 from dask.distributed import progress
 
-from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone
+from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone as io_write_zdone, has_zdone as io_has_zdone
 
 
 class MappingWrapper:
@@ -62,6 +64,19 @@ class LazyAnnData(AnnData):
 
         self.done_init = True
     
+    def has_dir(self, on_disk_path):
+        # TODO: check for a .zdone file instead
+        if os.path.isdir(join(self.zarr_path, *on_disk_path)):
+            return True
+        return False
+    
+    def has_zdone(self, arr_path):
+        return io_has_zdone(self.zarr_path, arr_path=arr_path)
+
+    def write_zdone(self, arr_path):
+        io_write_zdone(self.zarr_path, arr_path=arr_path)
+
+
     def set_alias(self, on_disk_path, in_mem_path):
         # Set up an alias so that we can, for example, trick scanpy into
         # using a layer like z["/layers/counts"] for adata.X
@@ -152,13 +167,13 @@ class LazyAnnData(AnnData):
         progress(residuals_future, notebook=False)
         #future_result = residuals_future.compute()
 
-        write_zdone(self.zarr_path, arr_path=["layers", layer_key])
+        self.write_zdone(["layers", layer_key])
 
 
-def create_lazy_anndata(adata, zarr_path, client=None):
+def create_lazy_anndata(adata, zarr_path, client=None, overwrite=False):
     assert "counts" in adata.layers, "The AnnData object must have a 'counts' layer."
 
-    dispatched_write_zarr(adata, zarr_path, arr_path=["layers", "counts"], mode="w", client=client)
+    dispatched_write_zarr(adata, zarr_path, arr_path=["layers", "counts"], mode=("w" if overwrite else "a"), client=client)
 
     return LazyAnnData(zarr_path, client=client)
 

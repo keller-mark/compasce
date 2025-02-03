@@ -7,7 +7,7 @@ from .io.lazy_anndata import create_lazy_anndata, create_sample_df
 from .io.comparison_metadata import MultiComparisonMetadata
 
 
-def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_pairs=None, cell_type_col="cell_type"):
+def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=None, sample_group_pairs=None, cell_type_col="cell_type"):
     """
     def get_adata():
         return read_h5ad("path/to/adata.h5ad")
@@ -20,11 +20,15 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
     # We ask the caller to provide a function which returns `adata`, 
     # so that we can free the memory within the function.
     adata = get_adata()
+    
     cm = MultiComparisonMetadata(
         sample_group_pairs=sample_group_pairs,
         sample_id_col=sample_id_col,
         cell_type_col=cell_type_col,
     )
+    if not overwrite:
+        # Initialize with contents of /uns/comparison_metadata
+        cm.load_state(zarr_path)
 
     all_cmp = cm.add_comparison("__all__")
     # all_cmp.append_df("uns", "cells", None, { "obsType": "cell" }) # assumed
@@ -36,7 +40,7 @@ def run_all(get_adata, zarr_path, client=None, sample_id_col=None, sample_group_
     if adata.shape[1] < 1:
         raise ValueError("adata must have at least one column")
 
-    ladata = create_lazy_anndata(adata, zarr_path, client=client)
+    ladata = create_lazy_anndata(adata, zarr_path, client=client, overwrite=overwrite)
 
     del adata
 

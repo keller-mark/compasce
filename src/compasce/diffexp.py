@@ -2,9 +2,17 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 from anndata import AnnData
+from requests.exceptions import ConnectionError
+
+from pertpy.tools._enrichment import Enrichment
+import blitzgsea as blitz
 
 def compute_diffexp(ladata, cm):
     print(f"Running diffexp tests for cell types vs rest")
+
+    # Check for a .zdone file
+    if ladata.has_zdone(["uns", "compute_diffexp"]):
+        return ladata
 
     cell_type_col = cm.cell_type_col
 
@@ -13,6 +21,16 @@ def compute_diffexp(ladata, cm):
 
     cell_types = ladata.obs[cell_type_col].unique().tolist()
     cell_types = [x for x in cell_types if pd.notna(x)]
+
+    # Reference: https://pertpy.readthedocs.io/en/stable/tutorials/notebooks/enrichment.html#Using-custom-gene-sets
+    # Ensure that the gene nomenclature in your target sets is compatible with your .var_names.
+    targets = blitz.enrichr.get_library("GO_Molecular_Function_2021")
+    pt_enricher = Enrichment()
+    enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+    #pt_enricher.score(ladata, targets=targets, layer="logcounts", key_added="pertpy_enrichment")
+    # Returns a dictionary with clusters as keys and data frames of test results sorted on q-value as the items.
+    #enrichment = pt_enricher.gsea(ladata, targets=targets, key_added="pertpy_enrichment_gsea")
+
 
     for cell_type in cell_types:
         print(f"Getting diffexp test results for {cell_type} vs rest")
@@ -34,6 +52,22 @@ def compute_diffexp(ladata, cm):
         ladata.uns[uns_key] = df
 
         # Compute gene enrichment.
+        enrichment_df = enrichment_dict[cell_type]
+        uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
+            "rank_genes_groups": ladata.uns[key_added]["params"],
+            "pertpy_hypergeometric": {
+                "group": cell_type,
+                "pvals_adj_thresh": .05,
+                "direction": "both",
+                "corr_method": "benjamini-hochberg",
+            },
+        }, {
+            "obsType": "cell",
+            "featureType": "pathway",
+            "obsSetSelection": [[cell_type_col, cell_type]],
+        })
+        ladata.uns[uns_key] = enrichment_df
+        
         try:
             # Run sc.queries.enrich on the results.
             enrichment_df = sc.queries.enrich(ladata, group=cell_type, log2fc_min=2, pval_cutoff=.01)
@@ -52,7 +86,7 @@ def compute_diffexp(ladata, cm):
                 "obsSetSelection": [[cell_type_col, cell_type]],
             })
             ladata.uns[uns_key] = enrichment_df
-        except AssertionError:
+        except (AssertionError, ConnectionError):
             print(f"Gene enrichment query failed for cell type {cell_type}")
     
     del ladata.uns[key_added]
@@ -77,7 +111,7 @@ def compute_diffexp(ladata, cm):
                 uns_key = cmp.append_df("uns", "rank_genes_groups", {
                     "rank_genes_groups": ladata.uns[key_added]["params"],
                     "rank_genes_groups_df": {
-                        "group": cell_type,   
+                        "group": f"{cell_type}_{sample_group_right}",   
                     },
                 }, {
                     "obsType": "cell",
@@ -89,6 +123,27 @@ def compute_diffexp(ladata, cm):
                 ladata.uns[uns_key] = df
 
                 # Compute gene enrichment.
+                pt_enricher = Enrichment()
+                enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+
+                enrichment_df = enrichment_dict[f"{cell_type}_{sample_group_right}"]
+                uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
+                    "rank_genes_groups": ladata.uns[key_added]["params"],
+                    "pertpy_hypergeometric": {
+                        "group": f"{cell_type}_{sample_group_right}",
+                        "pvals_adj_thresh": .05,
+                        "direction": "both",
+                        "corr_method": "benjamini-hochberg",
+                    },
+                }, {
+                    "obsType": "cell",
+                    "featureType": "pathway",
+                    "obsSetFilter": [[cell_type_col, cell_type]],
+                    "sampleSetSelection": [[sample_group_col, sample_group_right]],
+                    "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
+                })
+                ladata.uns[uns_key] = enrichment_df
+
                 try:
                     # Run sc.queries.enrich on the results.
                     enrichment_df = sc.queries.enrich(ladata, group=f"{cell_type}_{sample_group_right}", log2fc_min=2, pval_cutoff=.01, key=key_added)
@@ -97,17 +152,19 @@ def compute_diffexp(ladata, cm):
                     uns_key = cmp.append_df("uns", "enrich", {
                         "rank_genes_groups": ladata.uns[key_added]["params"],
                         "enrich": {
-                            "group": cell_type,
+                            "group": f"{cell_type}_{sample_group_right}",
                             "log2fc_min": 2,
                             "pval_cutoff": .01
                         },
                     }, {
                         "obsType": "cell",
                         "featureType": "pathway",
-                        "obsSetSelection": [[cell_type_col, cell_type]],
+                        "obsSetFilter": [[cell_type_col, cell_type]],
+                        "sampleSetSelection": [[sample_group_col, sample_group_right]],
+                        "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
                     })
                     ladata.uns[uns_key] = enrichment_df
-                except AssertionError:
+                except (AssertionError, ConnectionError):
                     print(f"Gene enrichment query failed for cell type {cell_type} and sample group pair {sample_group_pair}")
 
                 del ladata.uns[key_added]
@@ -115,5 +172,8 @@ def compute_diffexp(ladata, cm):
                 print(f"Error: likely due to insufficient data for comparison for {cell_type} and sample group pair {sample_group_pair}")
 
     # TODO: within cell type (inside spatial region vs. outside)
+
+    # Write a .zdone file
+    ladata.write_zdone(["uns", "compute_diffexp"])
 
     return ladata
