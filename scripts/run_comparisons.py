@@ -10,6 +10,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, required=True, help = "Path to output zarr store directory")
     parser.add_argument("--subset", type=bool, default=False, required=False)
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
+    parser.add_argument("--overwrite", type=bool, default=False, required=False)
     args = parser.parse_args()
 
     def get_adata():
@@ -61,6 +62,7 @@ if __name__ == "__main__":
     ladata = run_all(
         get_adata,
         zarr_path=args.output,
+        overwrite=args.overwrite,
         client=create_o2_dask_client(memory_limit=args.mem_limit),
         sample_id_col=sample_id_col,
         sample_group_pairs=sample_group_pairs,
