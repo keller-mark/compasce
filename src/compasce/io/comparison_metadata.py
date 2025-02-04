@@ -56,7 +56,7 @@ class MultiComparisonMetadata:
     def load_state(self, zarr_path):
         z = zarr.open(zarr_path, mode="r+")
         if "/uns/comparison_metadata" in z:
-            prev = json.loads(z["/uns/comparison_metadata"])
+            prev = json.loads(str(z["/uns/comparison_metadata"][()]))
             self._prev_comparisons_dict = prev["comparisons"]
 
     def add_comparison(self, comparison_key):
