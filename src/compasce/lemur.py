@@ -27,7 +27,8 @@ def compute_lemur(ladata, cm):
 
     for sample_group_col, sample_group_pair_list in sample_group_pairs_by_col.items():
         cmp = cm.add_comparison([("compare", sample_group_col)])
-        model = pylemur.tl.LEMUR(ladata, get_input_arr, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
+        #model = pylemur.tl.LEMUR(ladata, get_input_arr, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
+        model = pylemur.tl.LEMUR(ladata, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
         model.fit()
         model.align_with_harmony()
 
