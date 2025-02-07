@@ -58,7 +58,7 @@ class LazyAnnData(AnnData):
         self.client = client
 
         self.adata = dispatched_read_zarr(zarr_path) # only contains var, obs, uns
-        self.z = zarr.open(zarr_path, mode="r+")
+        self.z = zarr.open(zarr_path, mode="a")
        
         super().__init__()
 
@@ -125,7 +125,7 @@ class LazyAnnData(AnnData):
         
         super().__setattr__(key, value)
 
-    def save(self, arr_path=None, mode="r+"):
+    def save(self, arr_path=None, mode="a"):
         dispatched_write_zarr(self.adata, self.zarr_path, var_chunk_size=self.var_chunk_size, arr_path=arr_path, mode=mode, client=self.client)
 
     def copy_layer(self, src_key, dest_key):

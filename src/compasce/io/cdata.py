@@ -96,7 +96,7 @@ class ComparativeData:
                 uns_dict[group_name] = {}
             uns_dict[group_name][adata_name] = simplify_value(ladata.uns.get(COMPASCE_KEY))
 
-        z = zarr.open(self.zarr_path, mode="r+")
+        z = zarr.open(self.zarr_path, mode="a")
         z.attrs["consolidated_uns"] = uns_dict
 
         # Conslidate zarr metadata

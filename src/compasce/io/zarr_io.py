@@ -84,7 +84,7 @@ def write_zdone(out_path, arr_path=None):
         with open(json_path, 'w') as f:
             json.dump({"done": True}, f)
 
-def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="r+", client=None):
+def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode="a", client=None):
     # Write to Zarr and set custom chunk shape for layers
     # Reference: https://anndata.readthedocs.io/en/latest/tutorials/notebooks/%7Bread%2Cwrite%7D_dispatched.html
     def write_chunked(func, store, k, elem, dataset_kwargs, iospec):
