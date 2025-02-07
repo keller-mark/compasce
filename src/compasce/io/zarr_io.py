@@ -9,6 +9,13 @@ from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
 from dask.distributed import progress
 
+def try_cast_arr(arr):
+    if isinstance(arr, np.ndarray) or isinstance(arr, da.Array) or isinstance(arr, zarr.Array):
+        if arr.dtype.kind in ['f', 'u', 'i'] and arr.dtype.itemsize == 8:
+            # Cast 64-bit to 32-bit
+            return arr.astype(f'<{arr.dtype.kind}4')
+    return arr
+
 def dispatched_read_zarr(store):
     # Function that reads an AnnData object from a Zarr store but omits certain keys.
     # Adapted from https://github.com/scverse/anndata/blob/1461fecd1712eefb1e5a5c0a75547b0e169a23d5/src/anndata/_io/zarr.py#L51
@@ -103,8 +110,7 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
         elif elem is None:
             print("Skipping writing of None element")
         else:
-            # TODO: Prevent overwriting of existing zarr arrays
-            # to ensure only addition (not modification) and improve performance?
+            elem = try_cast_arr(elem)
             func(store, k, elem, dataset_kwargs=dataset_kwargs)
 
     z = zarr.open(out_path, mode=mode)

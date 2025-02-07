@@ -5,9 +5,6 @@
 Data processing functions to support visual comparisons of single-cell data.
 
 
-:warning: Work in progress
-
-
 <!--
 ## Installation
 
@@ -137,11 +134,20 @@ For example, methods may have long execution times or high computational resourc
 ## Development
 
 ```sh
+uv venv
+source .venv/bin/activate
 uv sync --extra dev
-uv run pytest
 ```
 
-<!-->
+or
+
+```sh
+conda create -n compasce-env python=3.10
+conda activate compasce-env
+pip install -e .
+```
+
+<!--
 Download example data:
 
 ```sh
@@ -159,15 +165,26 @@ python ./scripts/subset_h5ad.py \
 
 ## Run
 
+### HMS O2 cluster SLURM setup
+
 ```sh
-srun -p interactive --pty -t 11:00:00 -n 4 --mem 120G bash
+srun -p interactive --pty -t 11:00:00 -n 4 --mem 164G bash
+# source ~/.bashrc_mark
+# ssh-add
+conda activate compasce-env
 ```
 
+### General setup
 
+Here, we set a `DATA_DIR` variable which is useful when running the subsequent commands in a cluster environment.
+Change this value depending on where you would like to store data files.
 
 ```sh
 export DATA_DIR=/n/data1/hms/dbmi/gehlenborg/lab/scmd-analysis
 ```
+
+Store H5AD file at `$DATA_DIR/raw`.
+If input file is in `.h5Seurat` format, convert to `.h5ad` (for example, using [SeuratDisk](https://mojaveazure.github.io/seurat-disk/articles/convert-anndata.html)).
 
 <!--
 ```sh
@@ -177,23 +194,45 @@ cd -
 ```
 -->
 
-```sh
-uv run python scripts/run_comparisons.py \
-  --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
-  --output $DATA_DIR/processed/kpmp_premiere_small.adata.zarr \
-  --subset True \
-  --mem-limit 2GB
-```
+<!--
 
 ```sh
 uv run python scripts/run_comparisons.py \
+  --input data/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
+  --output data/processed/kpmp_premiere_small.adata.zarr \
+  --subset True \
+  --overwrite True \
+  --mem-limit 2GB
+```
+-->
+
+```sh
+python scripts/run_comparisons.py \
   --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
   --output $DATA_DIR/processed/kpmp_premiere.adata.zarr \
   --subset False
 ```
 
+See the `scripts/run_comparisons.py` script for additional command-line options.
+
+If using `uv` to manage the python environment, prepend `uv run ` to the above command.
+
+This script took approximately 48 hours to complete with 160 GB of RAM.
+
+<!--
+### Upload the results
+
+```sh
+gcloud auth login
+
+cd $DATA_DIR/processed
+
+gsutil -m cp -r ./kpmp_premiere.adata.zarr gs://vitessce-demo-data/scmd-analysis-october-2023
+```
+-->
+
 ### Testing
 
 ```sh
-pytest
+uv run pytest
 ```

@@ -5,7 +5,7 @@ import dask.array as da
 from anndata import AnnData
 from dask.distributed import progress
 
-from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone as io_write_zdone, has_zdone as io_has_zdone
+from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone as io_write_zdone, has_zdone as io_has_zdone, try_cast_arr
 
 
 class MappingWrapper:
@@ -155,7 +155,7 @@ class LazyAnnData(AnnData):
 
         # Store using Zarr in a distributed way so that we don't need to transfer data back from each worker,
         # which is too large for a single worker to handle.
-        residuals_delayed = X_dask.to_zarr(url=self.zarr_path, component=X_path, overwrite=True, compute=False)
+        residuals_delayed = try_cast_arr(X_dask).to_zarr(url=self.zarr_path, component=X_path, overwrite=True, compute=False)
         residuals_future = self.client.persist(residuals_delayed)
 
         progress(residuals_future, notebook=False)
