@@ -1,12 +1,20 @@
 import numpy as np
 import zarr
 import json
+import os
 from os.path import join
 import dask.array as da
 from anndata import AnnData
 from anndata._io.zarr import read_dataframe, _read_legacy_raw, _clean_uns
 from anndata.experimental import read_dispatched, write_dispatched, read_elem
 from dask.distributed import progress
+
+def try_cast_arr(arr):
+    if isinstance(arr, np.ndarray) or isinstance(arr, da.Array) or isinstance(arr, zarr.Array):
+        if arr.dtype.kind in ['f', 'u', 'i'] and arr.dtype.itemsize == 8:
+            # Cast 64-bit to 32-bit
+            return arr.astype(f'<{arr.dtype.kind}4')
+    return arr
 
 def dispatched_read_zarr(store):
     # Function that reads an AnnData object from a Zarr store but omits certain keys.
@@ -62,10 +70,16 @@ def dispatched_read_zarr(store):
 
     return adata
 
+def has_zdone(out_path, arr_path=None):
+    if os.path.isfile(join(out_path, *arr_path, ".zdone")):
+        return True
+    return False
+
 def write_zdone(out_path, arr_path=None):
     # Write a hidden file at `out_path/arr_path/.zdone``
     # to indicate done-ness of an operation for Snakemake
     if arr_path is not None:
+        os.makedirs(join(out_path, *arr_path), exist_ok=True)
         json_path = join(out_path, *arr_path, ".zdone")
         with open(json_path, 'w') as f:
             json.dump({"done": True}, f)
@@ -96,8 +110,7 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
         elif elem is None:
             print("Skipping writing of None element")
         else:
-            # TODO: Prevent overwriting of existing zarr arrays
-            # to ensure only addition (not modification) and improve performance?
+            elem = try_cast_arr(elem)
             func(store, k, elem, dataset_kwargs=dataset_kwargs)
 
     z = zarr.open(out_path, mode=mode)
@@ -109,10 +122,10 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
 
     old_delitem = z.__class__.__delitem__
     def patched_delitem(self, item):
-        print(f"Attepting to delete {item}")
-        if item == "/layers" or item == "/obsm":
+        if item == "/layers" or item == "/obsm" or item == "/uns":
             pass
         else:
+            print(f"Deleting {item}")
             old_delitem(self, item)
     z.__class__.__delitem__ = patched_delitem
 

@@ -1,9 +1,11 @@
+import os
+from os.path import join
 import zarr
 import dask.array as da
 from anndata import AnnData
 from dask.distributed import progress
 
-from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone
+from .zarr_io import dispatched_read_zarr, dispatched_write_zarr, write_zdone as io_write_zdone, has_zdone as io_has_zdone, try_cast_arr
 
 
 class MappingWrapper:
@@ -18,6 +20,9 @@ class MappingWrapper:
     def __getitem__(self, key):
         # TODO: return zarr array that 
         return self.mapping[key]
+
+    def __contains__(self, key):
+        return key in self.mapping
     
     def __setitem__(self, key, value):
         # assumes 2D
@@ -59,6 +64,13 @@ class LazyAnnData(AnnData):
 
         self.done_init = True
     
+    def has_zdone(self, arr_path):
+        return io_has_zdone(self.zarr_path, arr_path=arr_path)
+
+    def write_zdone(self, arr_path):
+        io_write_zdone(self.zarr_path, arr_path=arr_path)
+
+
     def set_alias(self, on_disk_path, in_mem_path):
         # Set up an alias so that we can, for example, trick scanpy into
         # using a layer like z["/layers/counts"] for adata.X
@@ -143,18 +155,33 @@ class LazyAnnData(AnnData):
 
         # Store using Zarr in a distributed way so that we don't need to transfer data back from each worker,
         # which is too large for a single worker to handle.
-        residuals_delayed = X_dask.to_zarr(url=self.zarr_path, component=X_path, overwrite=True, compute=False)
+        residuals_delayed = try_cast_arr(X_dask).to_zarr(url=self.zarr_path, component=X_path, overwrite=True, compute=False)
         residuals_future = self.client.persist(residuals_delayed)
 
         progress(residuals_future, notebook=False)
         #future_result = residuals_future.compute()
 
-        write_zdone(self.zarr_path, arr_path=["layers", layer_key])
+        self.write_zdone(["layers", layer_key])
 
 
-def create_lazy_anndata(adata, zarr_path, client=None):
+def create_lazy_anndata(adata, zarr_path, client=None, overwrite=False):
     assert "counts" in adata.layers, "The AnnData object must have a 'counts' layer."
 
-    dispatched_write_zarr(adata, zarr_path, arr_path=["layers", "counts"], mode="w", client=client)
+    dispatched_write_zarr(adata, zarr_path, arr_path=["layers", "counts"], mode=("w" if overwrite else "a"), client=client)
 
     return LazyAnnData(zarr_path, client=client)
+
+
+def create_sample_df(adata, cm):
+    sample_id_col = cm.sample_id_col
+    assert sample_id_col in adata.obs.columns
+    sample_groupby = adata.obs.groupby(by=sample_id_col)
+    per_sample_obs_cols_nunique = sample_groupby.nunique()
+    # Find columns whose values are only at most one unique value per sample.
+    sample_cols = []
+    for col in per_sample_obs_cols_nunique.columns:
+        if len(per_sample_obs_cols_nunique[col].unique()) == 1 and per_sample_obs_cols_nunique[col].unique()[0] == 1:
+            sample_cols.append(col)
+    
+    sample_df = sample_groupby.first()[sample_cols]
+    return sample_df

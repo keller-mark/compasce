@@ -6,6 +6,10 @@ from .dask import create_dask_wrapper
 
 
 def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
+
+    if ladata.has_zdone(["layers", output_key]):
+        return ladata
+
     ladata.copy_layer(input_key, output_key)
 
     # TODO: is this enough to reduce memory overhead, or do we need to use Dask?
@@ -42,14 +46,17 @@ def _normalize_pearson_residuals(X, theta = 100, clip = None):
     return residuals.clip(min=-clip, max=clip)
 
 
-def normalize_pearson_residuals(adata, input_key="counts", output_key="pearson_residuals"):
+def normalize_pearson_residuals(ladata, input_key="counts", output_key="pearson_residuals"):
+    if ladata.has_zdone(["layers", output_key]):
+        return ladata
+    
     def get_input_arr():
-        return adata.get_da_from_zarr_layer(input_key)
+        return ladata.get_da_from_zarr_layer(input_key)
     
     def put_output_arr(output_arr):
-        adata.put_da_to_zarr_layer(output_key, output_arr)
+        ladata.put_da_to_zarr_layer(output_key, output_arr)
 
     normalize_pearson_residuals_dask = create_dask_wrapper(_normalize_pearson_residuals)
     normalize_pearson_residuals_dask(get_input_arr, put_output_arr)
 
-    return adata
+    return ladata

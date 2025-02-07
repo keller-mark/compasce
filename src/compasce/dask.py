@@ -8,6 +8,8 @@ def create_dask_client(dask_temp_dir=None, n_workers=2, threads_per_worker=2, me
     if dask_temp_dir is not None:
         os.makedirs(dask_temp_dir, exist_ok=True)
         dask.config.set({ "temporary_directory": dask_temp_dir })
+    
+    dask.config.set({ 'logging.distributed.scheduler': 'error' })
 
     # Should request at least 96GB of memory for this job.
     # TODO: more kwargs for LocalCluster? option to pass a cluster instead?

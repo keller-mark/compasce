@@ -55,6 +55,9 @@ class ComparativeData:
         z.attrs["sample_group_pairs"] = sample_group_pairs
         z.attrs["sample_id_col"] = sample_id_col
         self.z = z
+
+        self.sample_group_pairs = sample_group_pairs
+        self.sample_id_col = sample_id_col
     
     def create_lazy_anndata(self, adata, dir_name="__all__", name=None, arr_path=None, mode="w", client=None):
         adata_path = join(self.zarr_path, dir_name_to_str(dir_name), f"{name}.adata.zarr" if name is not None else "adata.zarr")
