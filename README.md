@@ -217,7 +217,7 @@ See the `scripts/run_comparisons.py` script for additional command-line options.
 
 If using `uv` to manage the python environment, prepend `uv run ` to the above command.
 
-This script took approximately 48 hours to complete with 160 GB of RAM.
+This script took approximately 48 hours to complete with 160 GB of RAM. It is not yet optimized to run independent pipeline steps in parallel.
 
 <!--
 ### Upload the results
