@@ -2,7 +2,7 @@
 
 <!--[![PyPI](https://img.shields.io/pypi/v/compasce)](https://pypi.org/project/compasce)-->
 
-Data processing functions to support visual comparisons of single-cell data.
+**Compa**re **s**ingle **c**ell **e**xperiments: Example of a data processing pipeline which supports visualizations of case-vs-control-style comparisons of single-cell atlas data.
 
 
 <!--
