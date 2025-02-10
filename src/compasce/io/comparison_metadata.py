@@ -16,6 +16,22 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
 
+# Reference: https://stackoverflow.com/a/68557484
+def deep_update(mapping, *updating_mappings) :
+    updated_mapping = mapping.copy()
+    for updating_mapping in updating_mappings:
+        for k, v in updating_mapping.items():
+            if k in updated_mapping and isinstance(updated_mapping[k], dict) and isinstance(v, dict):
+                updated_mapping[k] = deep_update(updated_mapping[k], v)
+            elif k in updated_mapping and isinstance(updated_mapping[k], list) and isinstance(v, list):
+                updated_mapping[k] = [
+                    *updated_mapping[k],
+                    *v
+                ]
+            else:
+                updated_mapping[k] = v
+    return updated_mapping
+
 
 # See https://observablehq.com/d/e7c03bf319f20f86
 class ComparisonMetadata:
@@ -67,7 +83,7 @@ class MultiComparisonMetadata:
     def serialize(self):
         comparisons_dict = self._prev_comparisons_dict
         for c in self._comparisons:
-            comparisons_dict.update(c.get_dict())
+            deep_update(comparisons_dict, c.get_dict())
         return json.dumps({
             "schema_version": self.schema_version,
             "comparisons": comparisons_dict,
