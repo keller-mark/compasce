@@ -83,7 +83,7 @@ class MultiComparisonMetadata:
     def serialize(self):
         comparisons_dict = self._prev_comparisons_dict
         for c in self._comparisons:
-            deep_update(comparisons_dict, c.get_dict())
+            comparisons_dict = deep_update(comparisons_dict, c.get_dict())
         return json.dumps({
             "schema_version": self.schema_version,
             "comparisons": comparisons_dict,
