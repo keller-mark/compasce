@@ -8,9 +8,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=str, required=True, help = "Path to KPMP Premiere H5AD file.")
     parser.add_argument("--output", type=str, required=True, help = "Path to output zarr store directory")
-    parser.add_argument("--subset", type=bool, default=False, required=False)
+    parser.add_argument("--subset", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
-    parser.add_argument("--overwrite", type=bool, default=False, required=False)
+    parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
     def get_adata():
@@ -18,6 +18,7 @@ if __name__ == "__main__":
 
         should_subset = args.subset
         if should_subset:
+            print("SUBSETTING")
             # subset using random sample so that multiple sample groups are represented to enable comparison
             np.random.seed(1)
             obs_subset = np.random.choice(adata.obs.index.tolist(), size=20_000, replace=False).tolist()
@@ -25,6 +26,7 @@ if __name__ == "__main__":
             adata = adata[obs_subset, var_slice].copy()
             adata.layers["counts"] = adata.raw[obs_subset, var_slice].X.todense()
         else:
+            print("NOT SUBSETTING")
             adata.layers["counts"] = adata.raw.X.todense()
         adata.raw = None
 

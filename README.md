@@ -180,6 +180,8 @@ Here, we set a `DATA_DIR` variable which is useful when running the subsequent c
 Change this value depending on where you would like to store data files.
 
 ```sh
+export DATA_DIR=./data
+# or
 export DATA_DIR=/n/data1/hms/dbmi/gehlenborg/lab/scmd-analysis
 ```
 
@@ -200,8 +202,8 @@ cd -
 uv run python scripts/run_comparisons.py \
   --input data/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
   --output data/processed/kpmp_premiere_small.adata.zarr \
-  --subset True \
-  --overwrite True \
+  --subset \
+  --overwrite \
   --mem-limit 2GB
 ```
 -->
@@ -210,7 +212,7 @@ uv run python scripts/run_comparisons.py \
 python scripts/run_comparisons.py \
   --input $DATA_DIR/raw/KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad \
   --output $DATA_DIR/processed/kpmp_premiere.adata.zarr \
-  --subset False
+  --no-subset
 ```
 
 See the `scripts/run_comparisons.py` script for additional command-line options.
@@ -231,7 +233,7 @@ gcloud auth login
 
 cd $DATA_DIR/processed
 
-gsutil -m cp -r ./kpmp_premiere.adata.zarr gs://vitessce-demo-data/scmd-analysis-october-2023
+gsutil -m cp -r ./kpmp_premiere_sc.adata.zarr gs://vitessce-demo-data/kpmp-jan-2025
 ```
 -->
 
