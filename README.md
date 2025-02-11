@@ -219,8 +219,14 @@ See the `scripts/run_comparisons.py` script for additional command-line options.
 
 If using `uv` to manage the python environment, prepend `uv run ` to the above command.
 
+```sh
+snakemake -j 1 --rerun-triggers mtime --snakefile scrnaseq.smk --latency-wait 30
+```
+
+<!--
 This script took approximately 48 hours to complete with 160 GB of RAM.
 It is not yet optimized to run independent pipeline steps in parallel.
+-->
 
 To some extent this pipeline can be stopped and re-started gracefully.
 Long-running functions such as `normalize_basic`, `densmap`, and `compute_diffexp` which are called from the top-level `run_all` function skip their computations if their output files are already present on-disk.

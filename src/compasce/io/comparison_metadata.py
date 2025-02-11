@@ -74,6 +74,12 @@ class MultiComparisonMetadata:
         if "/uns/comparison_metadata" in z:
             prev = json.loads(str(z["/uns/comparison_metadata"][()]))
             self._prev_comparisons_dict = prev["comparisons"]
+            if self.sample_group_pairs is None:
+                self.sample_group_pairs = prev["sample_group_pairs"]
+            if self.sample_id_col is None:
+                self.sample_id_col = prev["sample_id_col"]
+            if self.cell_type_col is None:
+                self.cell_type_col = prev["cell_type_col"]
 
     def add_comparison(self, comparison_key):
         c = ComparisonMetadata(comparison_key)
@@ -87,7 +93,6 @@ class MultiComparisonMetadata:
         return json.dumps({
             "schema_version": self.schema_version,
             "comparisons": comparisons_dict,
-
             "sample_id_col": self.sample_id_col,
             "sample_group_pairs": self.sample_group_pairs,
             "cell_type_col": self.cell_type_col,

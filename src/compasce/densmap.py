@@ -2,7 +2,7 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 
-def densmap(ladata, random_state=1234):
+def densmap(ladata, cm, random_state=1234):
 
     if ladata.has_zdone(["obsm", "X_densmap"]):
         return ladata

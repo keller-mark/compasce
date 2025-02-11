@@ -58,7 +58,9 @@ dev = [
 repository = "https://github.com/keller-mark/compasce"
 
 [project.scripts]
-compasce = "compasce.cli:run_cli"
+compasce = "compasce.pipeline_cli:run_cli"
+
+
 
 # Reference: https://stackoverflow.com/a/74421415
 [tool.setuptools]
