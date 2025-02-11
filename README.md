@@ -225,7 +225,7 @@ snakemake -j 1 --rerun-triggers mtime --snakefile scrnaseq.smk --latency-wait 30
 
 or
 ```sh
-cd ~/research/hd-vis-scripts
+cd ~/research/compasce
 
 conda activate compasce-env
 

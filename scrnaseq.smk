@@ -88,7 +88,7 @@ rule normalize_pearson_residuals:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals")
   resources:
     slurm_partition="short",
-    runtime=60*11, # 11 hours
+    runtime=60*2, # 2 hours
     mem_mb=120_000, # 120 GB
     cpus_per_task=2
   shell:
@@ -105,7 +105,7 @@ rule normalize_basic:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
   resources:
     slurm_partition="short",
-    runtime=60*11, # 11 hours
+    runtime=60*2, # 2 hours
     mem_mb=120_000, # 120 GB
     cpus_per_task=2
   shell:
@@ -122,7 +122,7 @@ rule convert_to_zarr:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata")
   resources:
     slurm_partition="short",
-    runtime=60*11, # 11 hours
+    runtime=60*2, # 2 hours
     mem_mb=120_000, # 120 GB
     cpus_per_task=2
   shell:
@@ -131,6 +131,6 @@ rule convert_to_zarr:
         --input {input} \
         --output {ZARR_PATH} \
         --stop-early \
-        --subset
+        --no-subset
     """
 
