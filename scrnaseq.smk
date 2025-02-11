@@ -72,7 +72,7 @@ rule densmap:
   resources:
     slurm_partition="short",
     runtime=60*11, # 11 hours
-    mem_mb=120_000, # 120 GB
+    mem_mb=240_000, # 240 GB
     cpus_per_task=2
   shell:
     """
