@@ -40,7 +40,7 @@ def run_cli():
     client = create_o2_dask_client(memory_limit=args.mem_limit)
 
     cm = MultiComparisonMetadata()
-    cm.load_state(zarr_path)
+    cm.load_state(zarr_path, include_comparisons=False)
 
     ladata = LazyAnnData(zarr_path, client=client)
 

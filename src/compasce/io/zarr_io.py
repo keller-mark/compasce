@@ -111,7 +111,10 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
             print("Skipping writing of None element")
         else:
             elem = try_cast_arr(elem)
-            func(store, k, elem, dataset_kwargs=dataset_kwargs)
+            try:
+                func(store, k, elem, dataset_kwargs=dataset_kwargs)
+            except zarr.errors.ContainsArrayError:
+                print(f"zarr.errors.ContainsArrayError at {k}")
 
     z = zarr.open(out_path, mode=mode)
 
@@ -122,7 +125,7 @@ def dispatched_write_zarr(adata, out_path, var_chunk_size=5, arr_path=None, mode
 
     old_delitem = z.__class__.__delitem__
     def patched_delitem(self, item):
-        if item == "/layers" or item == "/obsm" or item == "/uns":
+        if item == "/layers" or item == "/obsm" or item == "/uns" or item.startswith("/uns/comparison_metadata"):
             pass
         else:
             print(f"Deleting {item}")

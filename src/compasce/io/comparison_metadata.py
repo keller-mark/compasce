@@ -69,11 +69,12 @@ class MultiComparisonMetadata:
         self.cell_type_col = cell_type_col
         self._prev_comparisons_dict = dict()
     
-    def load_state(self, zarr_path):
+    def load_state(self, zarr_path, include_comparisons=True):
         z = zarr.open(zarr_path, mode="a")
         if "/uns/comparison_metadata" in z:
             prev = json.loads(str(z["/uns/comparison_metadata"][()]))
-            self._prev_comparisons_dict = prev["comparisons"]
+            if include_comparisons:
+                self._prev_comparisons_dict = prev["comparisons"]
             if self.sample_group_pairs is None:
                 self.sample_group_pairs = prev["sample_group_pairs"]
             if self.sample_id_col is None:

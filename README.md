@@ -223,6 +223,19 @@ If using `uv` to manage the python environment, prepend `uv run ` to the above c
 snakemake -j 1 --rerun-triggers mtime --snakefile scrnaseq.smk --latency-wait 30
 ```
 
+or
+```sh
+cd ~/research/hd-vis-scripts
+
+conda activate compasce-env
+
+export SLURM_ACCOUNT=$(sshare -u mk596 -U | cut -d ' ' -f 1 | tail -n 1)
+
+snakemake --snakefile scrnaseq.smk -j 10 --rerun-triggers mtime \
+  --keep-incomplete --keep-going --latency-wait 30 --slurm \
+  --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
+```
+
 <!--
 This script took approximately 48 hours to complete with 160 GB of RAM.
 It is not yet optimized to run independent pipeline steps in parallel.

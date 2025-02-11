@@ -18,6 +18,11 @@ rule compute_lemur:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=240_000, # 240 GB
+    cpus_per_task=4
   shell:
     """
     compasce \
@@ -30,6 +35,11 @@ rule compute_diffabundance:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     compasce \
@@ -42,6 +52,11 @@ rule compute_diffexp:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     compasce \
@@ -54,6 +69,11 @@ rule densmap:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     compasce \
@@ -66,6 +86,11 @@ rule normalize_pearson_residuals:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     compasce \
@@ -78,6 +103,11 @@ rule normalize_basic:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     compasce \
@@ -90,6 +120,11 @@ rule convert_to_zarr:
     join(RAW_DIR, "KPMP_PREMIERE_SC_version1.5_ForExplorer_withRC.032624.h5ad")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
   shell:
     """
     python scripts/run_comparisons.py \
