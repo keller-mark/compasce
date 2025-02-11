@@ -12,9 +12,11 @@ from .io.comparison_metadata import MultiComparisonMetadata
 
 def run_cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--zarr-path', type=str, help='Path to zarr store.')
+    parser.add_argument("--zarr-path", type=str, help="Path to zarr store")
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
-    parser.add_argument('--function-name', type=str, choices=[
+    parser.add_argument("--n-workers", type=int, default=2, required=False)
+    parser.add_argument("--threads-per-worker", type=int, default=2, required=False)
+    parser.add_argument("--function-name", type=str, choices=[
         'normalize_basic',
         'normalize_pearson_residuals',
         'densmap',
@@ -37,7 +39,11 @@ def run_cli():
     }
 
     func_to_run = func_mapping[function_name]
-    client = create_o2_dask_client(memory_limit=args.mem_limit)
+    client = create_o2_dask_client(
+        memory_limit=args.mem_limit,
+        n_workers=args.n_workers,
+        threads_per_worker=args.threads_per_worker,
+    )
 
     cm = MultiComparisonMetadata()
     cm.load_state(zarr_path, include_comparisons=False)

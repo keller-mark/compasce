@@ -27,7 +27,10 @@ rule compute_lemur:
     """
     compasce \
         --zarr-path {ZARR_PATH} \
-        --function-name "compute_lemur"
+        --function-name "compute_lemur" \
+        --mem-limit "24GB" \
+        --n-workers 4 \
+        --threads-per-worker 2
     """
 
 rule compute_diffabundance:
