@@ -19,8 +19,8 @@ rule compute_lemur:
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
   resources:
-    slurm_partition="short",
-    runtime=60*11, # 11 hours
+    slurm_partition="medium",
+    runtime=60*24*4, # 4 days
     mem_mb=240_000, # 240 GB
     cpus_per_task=4
   shell:
@@ -31,23 +31,6 @@ rule compute_lemur:
         --mem-limit "24GB" \
         --n-workers 4 \
         --threads-per-worker 2
-    """
-
-rule compute_diffabundance:
-  input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
-  output:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
-  resources:
-    slurm_partition="short",
-    runtime=60*11, # 11 hours
-    mem_mb=120_000, # 120 GB
-    cpus_per_task=2
-  shell:
-    """
-    compasce \
-        --zarr-path {ZARR_PATH} \
-        --function-name "compute_diffabundance"
     """
 
 rule compute_diffexp:
@@ -65,6 +48,23 @@ rule compute_diffexp:
     compasce \
         --zarr-path {ZARR_PATH} \
         --function-name "compute_diffexp"
+    """
+
+rule compute_diffabundance:
+  input:
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+  output:
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
+  resources:
+    slurm_partition="short",
+    runtime=60*11, # 11 hours
+    mem_mb=120_000, # 120 GB
+    cpus_per_task=2
+  shell:
+    """
+    compasce \
+        --zarr-path {ZARR_PATH} \
+        --function-name "compute_diffabundance"
     """
 
 rule densmap:
