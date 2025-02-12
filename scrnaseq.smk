@@ -56,10 +56,10 @@ rule compute_diffexp:
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
   resources:
-    slurm_partition="short",
-    runtime=60*11, # 11 hours
-    mem_mb=120_000, # 120 GB
-    cpus_per_task=2
+    slurm_partition="medium",
+    runtime=60*24*3, # 3 days
+    mem_mb=160_000, # 160 GB
+    cpus_per_task=4
   shell:
     """
     compasce \
@@ -76,7 +76,7 @@ rule densmap:
     slurm_partition="short",
     runtime=60*11, # 11 hours
     mem_mb=240_000, # 240 GB
-    cpus_per_task=2
+    cpus_per_task=4
   shell:
     """
     compasce \
