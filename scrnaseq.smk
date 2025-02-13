@@ -11,7 +11,30 @@ rule all:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")
+
+rule merge_metadata:
+  input:
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
+  output:
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")
+  resources:
+    slurm_partition="short",
+    runtime=60, # 1 hour
+    mem_mb=4_000, # 4 GB
+    cpus_per_task=2
+  shell:
+    """
+    python scripts/merge_metadata.py \
+        --zarr-path {ZARR_PATH}
+    """
 
 rule compute_lemur:
   input:
@@ -40,7 +63,7 @@ rule compute_diffexp:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
   resources:
     slurm_partition="medium",
-    runtime=60*24*3, # 3 days
+    runtime=60*24, # 1 day
     mem_mb=160_000, # 160 GB
     cpus_per_task=4
   shell:
