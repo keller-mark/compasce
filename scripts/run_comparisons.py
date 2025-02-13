@@ -11,6 +11,7 @@ if __name__ == "__main__":
     parser.add_argument("--subset", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
     parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--stop-early", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
     def get_adata():
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         client=create_o2_dask_client(memory_limit=args.mem_limit),
         sample_id_col=sample_id_col,
         sample_group_pairs=sample_group_pairs,
+        stop_early=args.stop_early,
     )
 
     print("Done")

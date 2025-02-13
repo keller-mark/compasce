@@ -7,7 +7,7 @@ from .io.lazy_anndata import create_lazy_anndata, create_sample_df
 from .io.comparison_metadata import MultiComparisonMetadata
 
 
-def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=None, sample_group_pairs=None, cell_type_col="cell_type"):
+def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=None, sample_group_pairs=None, cell_type_col="cell_type", stop_early=False):
     """
     def get_adata():
         return read_h5ad("path/to/adata.h5ad")
@@ -49,11 +49,16 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
         "obsType": "sample"
     })
     ladata.uns[uns_key] = sample_df
+
+    if stop_early:
+        ladata.uns["comparison_metadata"] = cm.serialize()
+        ladata.save(arr_path=["uns", "comparison_metadata"])
+        return ladata
     
 
     # depends on: uns/write_metadata/layers/counts
     # creates: uns/write_metadata/layers/logcounts
-    normalize_basic(ladata)
+    normalize_basic(ladata, cm)
 
     del ladata.layers["counts"]
 
@@ -63,7 +68,7 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
 
     del ladata.layers["logcounts"]
 
-    densmap(ladata)
+    densmap(ladata, cm)
 
     compute_diffexp(ladata, cm)
 
@@ -76,7 +81,7 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
     ladata.save()
 
     print("Starting normalize_pearson_residuals")
-    normalize_pearson_residuals(ladata)
+    normalize_pearson_residuals(ladata, cm)
     ladata.save()
 
     print("Starting compute_lemur")

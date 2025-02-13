@@ -5,8 +5,7 @@ import dask.array as da
 from .dask import create_dask_wrapper
 
 
-def normalize_basic(ladata, input_key="counts", output_key="logcounts"):
-
+def normalize_basic(ladata, cm, input_key="counts", output_key="logcounts"):
     if ladata.has_zdone(["layers", output_key]):
         return ladata
 
@@ -46,7 +45,7 @@ def _normalize_pearson_residuals(X, theta = 100, clip = None):
     return residuals.clip(min=-clip, max=clip)
 
 
-def normalize_pearson_residuals(ladata, input_key="counts", output_key="pearson_residuals"):
+def normalize_pearson_residuals(ladata, cm, input_key="counts", output_key="pearson_residuals"):
     if ladata.has_zdone(["layers", output_key]):
         return ladata
     

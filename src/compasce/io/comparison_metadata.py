@@ -69,12 +69,28 @@ class MultiComparisonMetadata:
         self.cell_type_col = cell_type_col
         self._prev_comparisons_dict = dict()
     
-    def load_state(self, zarr_path):
+    def load_state(self, zarr_path, include_comparisons=True):
         z = zarr.open(zarr_path, mode="a")
         if "/uns/comparison_metadata" in z:
             prev = json.loads(str(z["/uns/comparison_metadata"][()]))
-            self._prev_comparisons_dict = prev["comparisons"]
-
+            if include_comparisons:
+                self._prev_comparisons_dict = prev["comparisons"]
+            if self.sample_group_pairs is None:
+                self.sample_group_pairs = prev["sample_group_pairs"]
+            if self.sample_id_col is None:
+                self.sample_id_col = prev["sample_id_col"]
+            if self.cell_type_col is None:
+                self.cell_type_col = prev["cell_type_col"]
+    
+    def merge_states(self, zarr_path, suffixes=None):
+        z = zarr.open(zarr_path, mode="a")
+        comparisons_dict = self._prev_comparisons_dict
+        for suffix in suffixes:
+            if f"/uns/comparison_metadata.{suffix}" in z:
+                prev = json.loads(str(z[f"/uns/comparison_metadata.{suffix}"][()]))
+                comparisons_dict = deep_update(comparisons_dict, prev["comparisons"])
+        self._prev_comparisons_dict = comparisons_dict
+    
     def add_comparison(self, comparison_key):
         c = ComparisonMetadata(comparison_key)
         self._comparisons.append(c)
@@ -87,7 +103,6 @@ class MultiComparisonMetadata:
         return json.dumps({
             "schema_version": self.schema_version,
             "comparisons": comparisons_dict,
-
             "sample_id_col": self.sample_id_col,
             "sample_group_pairs": self.sample_group_pairs,
             "cell_type_col": self.cell_type_col,
