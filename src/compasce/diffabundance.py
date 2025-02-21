@@ -58,6 +58,8 @@ def compute_diffabundance(ladata, cm):
             effect_df = sccoda_model.get_effect_df(sccoda_data_2, modality_key="coda_case_vs_control")
             # Remove multi-index of effect_df
             effect_df = effect_df.reset_index(level='Covariate')
+            # Reference: https://github.com/scverse/pertpy/blob/0c7e18094e5b9b2a127696f383652ec9b489284a/pertpy/tools/_coda/_base_coda.py#L1123C9-L1123C45
+            effect_df["is_credible_effect"] = effect_df["Final Parameter"] != 0
 
             joint_df = pd.merge(effect_df, intercept_df, on="Cell Type", suffixes=('_effect', '_intercept'), validate="one_to_one")
             
