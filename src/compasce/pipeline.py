@@ -82,10 +82,10 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
 
     print("Starting normalize_pearson_residuals")
     normalize_pearson_residuals(ladata, cm)
-    ladata.save()
+    #ladata.save()
 
-    print("Starting compute_lemur")
-    compute_lemur(ladata, cm)
+    #print("Starting compute_lemur")
+    #compute_lemur(ladata, cm)
 
     ladata.uns["comparison_metadata"] = cm.serialize()
     ladata.save()

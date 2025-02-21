@@ -7,6 +7,45 @@ from requests.exceptions import ConnectionError
 from pertpy.tools._enrichment import Enrichment
 import blitzgsea as blitz
 
+# Functions for cleaning up dataframes
+def cleanup_rank_genes_groups_df(df):
+    df = df.sort_values(by="pvals_adj", ascending=True)
+    df = df.set_index("names")
+    return df
+
+# TODO: support alternative ontology IDs.
+def extract_pathway_name(s):
+    try:
+        return s[:s.index("(GO:") - 1]
+    except:
+        print(f"Failed to extract pathway name for {s}")
+        return s
+
+# TODO: support alternative ontology IDs.
+def extract_pathway_term(s):
+    try:
+        return s[s.index("(GO:")+1:-1]
+    except:
+        print(f"Failed to extract pathway term for {s}")
+        return s
+    
+def cleanup_hypergeometric_df(df):
+    df.index = df.index.rename("pathway")
+    df = df.reset_index()
+    # The "pathway" column values look like "RNA binding (GO:0003723)"
+    # We want to split the name from the term ID.
+    df["pathway_name"] = df["pathway"].apply(extract_pathway_name)
+    df["pathway_term"] = df["pathway"].apply(extract_pathway_term)
+    df = df.drop(columns=["pathway"])
+    df = df.set_index("pathway_term")
+    return df
+
+def cleanup_enrich_df(df):
+    df = df.drop(columns=["query", "parents"])
+    df = df.rename(columns={"native": "pathway_term", "name": "pathway_name"})
+    df = df.set_index("pathway_term")
+    return df
+
 def compute_diffexp(ladata, cm):
     print(f"Running diffexp tests for cell types vs rest")
 
@@ -37,7 +76,7 @@ def compute_diffexp(ladata, cm):
         cmp = cm.add_comparison([("compare", cell_type_col), ("val", cell_type), "__rest__"])
 
         df = sc.get.rank_genes_groups_df(ladata, group=cell_type, key=key_added)
-        df = df.sort_values(by="pvals_adj", ascending=False)
+        df = cleanup_rank_genes_groups_df(df)
 
         uns_key = cmp.append_df("uns", "rank_genes_groups", {
             "rank_genes_groups": ladata.uns[key_added]["params"],
@@ -53,6 +92,8 @@ def compute_diffexp(ladata, cm):
 
         # Compute gene enrichment.
         enrichment_df = enrichment_dict[cell_type]
+        enrichment_df = cleanup_hypergeometric_df(enrichment_df)
+
         uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
             "rank_genes_groups": ladata.uns[key_added]["params"],
             "pertpy_hypergeometric": {
@@ -71,7 +112,7 @@ def compute_diffexp(ladata, cm):
         try:
             # Run sc.queries.enrich on the results.
             enrichment_df = sc.queries.enrich(ladata, group=cell_type, log2fc_min=2, pval_cutoff=.01)
-            enrichment_df = enrichment_df.drop(columns=["query", "parents"])
+            enrichment_df = cleanup_enrich_df(enrichment_df)
             
             uns_key = cmp.append_df("uns", "enrich", {
                 "rank_genes_groups": ladata.uns[key_added]["params"],
@@ -106,7 +147,7 @@ def compute_diffexp(ladata, cm):
                 sc.tl.rank_genes_groups(ladata, groupby="cell_type_sample_group", groups=[f"{cell_type}_{sample_group_right}"], reference=f"{cell_type}_{sample_group_left}", method="wilcoxon", layer="logcounts", key_added=key_added)
 
                 df = sc.get.rank_genes_groups_df(ladata, group=f"{cell_type}_{sample_group_right}", key=key_added)
-                df = df.sort_values(by="pvals_adj", ascending=False)
+                df = cleanup_rank_genes_groups_df(df)
 
                 uns_key = cmp.append_df("uns", "rank_genes_groups", {
                     "rank_genes_groups": ladata.uns[key_added]["params"],
@@ -127,6 +168,8 @@ def compute_diffexp(ladata, cm):
                 enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
 
                 enrichment_df = enrichment_dict[f"{cell_type}_{sample_group_right}"]
+                enrichment_df = cleanup_hypergeometric_df(enrichment_df)
+
                 uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
                     "rank_genes_groups": ladata.uns[key_added]["params"],
                     "pertpy_hypergeometric": {
@@ -147,7 +190,7 @@ def compute_diffexp(ladata, cm):
                 try:
                     # Run sc.queries.enrich on the results.
                     enrichment_df = sc.queries.enrich(ladata, group=f"{cell_type}_{sample_group_right}", log2fc_min=2, pval_cutoff=.01, key=key_added)
-                    enrichment_df = enrichment_df.drop(columns=["query", "parents"])
+                    enrichment_df = cleanup_enrich_df(enrichment_df)
                     
                     uns_key = cmp.append_df("uns", "enrich", {
                         "rank_genes_groups": ladata.uns[key_added]["params"],

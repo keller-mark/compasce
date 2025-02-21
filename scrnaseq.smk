@@ -5,12 +5,7 @@ ZARR_PATH = join(PROCESSED_DIR, "kpmp_premiere.adata.zarr")
 # Rules
 rule all:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")
 
 rule merge_metadata:
   input:
@@ -20,7 +15,7 @@ rule merge_metadata:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
+    #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")
   resources:
