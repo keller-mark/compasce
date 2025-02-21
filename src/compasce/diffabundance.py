@@ -58,25 +58,24 @@ def compute_diffabundance(ladata, cm):
             effect_df = sccoda_model.get_effect_df(sccoda_data_2, modality_key="coda_case_vs_control")
             # Remove multi-index of effect_df
             effect_df = effect_df.reset_index(level='Covariate')
+
+            joint_df = pd.merge(effect_df, intercept_df, on="Cell Type", suffixes=('_effect', '_intercept'), validate="one_to_one")
+            
+            assert joint_df.shape[0] == effect_df.shape[0] # Should have the same number of rows.
+
             sccoda_params = sccoda_data_2.mod["coda_case_vs_control"].uns["scCODA_params"]
             method_params = {
                 "reference_cell_type": sccoda_params["reference_cell_type"],
                 "automatic_reference_absence_threshold": sccoda_params["automatic_reference_absence_threshold"],
             }
 
-            uns_key = cmp.append_df("uns", "sccoda_intercept_df", method_params, {
+            uns_key = cmp.append_df("uns", "sccoda_df", method_params, {
                 "obsType": "cell",
                 "sampleSetSelection": [[sample_group_col, sample_group_right]],
                 "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
             })
-            ladata.uns[uns_key] = intercept_df
+            ladata.uns[uns_key] = joint_df
 
-            uns_key = cmp.append_df("uns", "sccoda_effect_df", method_params, {
-                "obsType": "cell",
-                "sampleSetSelection": [[sample_group_col, sample_group_right]],
-                "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
-            })
-            ladata.uns[uns_key] = effect_df
         except ValueError:
             print(f"Error while running scCODA for {sample_group_col}: {sample_group_left} vs. {sample_group_right}")
     
