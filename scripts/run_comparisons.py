@@ -35,6 +35,8 @@ if __name__ == "__main__":
         # Reference samples are mapped to the empty string in the AdjudicatedCategory column
         adata.obs["AdjudicatedCategory"] = adata.obs["PrimaryAdjudicatedCategory"].apply(lambda v: "Reference" if v == "" else v)
         adata.obs["EnrollmentCategory"] = adata.obs["EnrollementCategory"].apply(lambda v: "Reference" if v in ["LD", "HRT"] else v)
+        
+        adata.obs = adata.obs.rename(columns={"subclass.l1": "subclass_l1", "subclass.l2": "subclass_l2"})
         return adata
 
     # For KPMP_PREMIERE....h5ad
@@ -64,8 +66,8 @@ if __name__ == "__main__":
     ]
     cell_type_cols = [
         "cell_type",
-        "subclass.l1",
-        "subclass.l2",
+        "subclass_l1",
+        "subclass_l2",
     ]
 
     ladata = run_all(
