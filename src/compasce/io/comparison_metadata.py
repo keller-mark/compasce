@@ -61,12 +61,13 @@ class ComparisonMetadata:
         }
     
 class MultiComparisonMetadata:
-    def __init__(self, sample_group_pairs=None, sample_id_col=None, cell_type_col=None):
-        self.schema_version = "0.0.1"
+    def __init__(self, sample_group_pairs=None, sample_id_col=None, donor_id_col=None, cell_type_cols=None):
+        self.schema_version = "0.0.2"
         self._comparisons = []
         self.sample_group_pairs = sample_group_pairs
         self.sample_id_col = sample_id_col
-        self.cell_type_col = cell_type_col
+        self.donor_id_col = donor_id_col
+        self.cell_type_cols = cell_type_cols
         self._prev_comparisons_dict = dict()
     
     def load_state(self, zarr_path, include_comparisons=True):
@@ -79,8 +80,10 @@ class MultiComparisonMetadata:
                 self.sample_group_pairs = prev["sample_group_pairs"]
             if self.sample_id_col is None:
                 self.sample_id_col = prev["sample_id_col"]
-            if self.cell_type_col is None:
-                self.cell_type_col = prev["cell_type_col"]
+            if self.donor_id_col is None:
+                self.donor_id_col = prev["donor_id_col"]
+            if self.cell_type_cols is None:
+                self.cell_type_cols = prev["cell_type_cols"]
     
     def merge_states(self, zarr_path, suffixes=None):
         z = zarr.open(zarr_path, mode="a")
@@ -105,6 +108,7 @@ class MultiComparisonMetadata:
             "comparisons": comparisons_dict,
             "sample_id_col": self.sample_id_col,
             "sample_group_pairs": self.sample_group_pairs,
-            "cell_type_col": self.cell_type_col,
+            "donor_id_col": self.donor_id_col,
+            "cell_type_cols": self.cell_type_cols,
         })
     

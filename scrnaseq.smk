@@ -56,7 +56,7 @@ rule compute_diffexp:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
   resources:
     slurm_partition="medium",
-    runtime=60*24, # 1 day
+    runtime=60*24*3, # 3 days
     mem_mb=160_000, # 160 GB
     cpus_per_task=4
   shell:
@@ -72,8 +72,8 @@ rule compute_diffabundance:
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
   resources:
-    slurm_partition="short",
-    runtime=60*11, # 11 hours
+    slurm_partition="medium",
+    runtime=60*24*2, # 2 days
     mem_mb=120_000, # 120 GB
     cpus_per_task=2
   shell:

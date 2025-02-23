@@ -38,6 +38,7 @@ if __name__ == "__main__":
         return adata
 
     # For KPMP_PREMIERE....h5ad
+    donor_id_col = "donor_id"
     sample_id_col = "SampleID"
     sample_group_pairs = [
         # AKI vs. HRT
@@ -61,14 +62,21 @@ if __name__ == "__main__":
         ('diseasetype', ('CKD', 'AKI')),
         ('diseasetype', ('Reference', 'CKD')),
     ]
+    cell_type_cols = [
+        "cell_type",
+        "subclass.l1",
+        "subclass.l2",
+    ]
 
     ladata = run_all(
         get_adata,
         zarr_path=args.output,
         overwrite=args.overwrite,
         client=create_o2_dask_client(memory_limit=args.mem_limit),
+        donor_id_col=donor_id_col,
         sample_id_col=sample_id_col,
         sample_group_pairs=sample_group_pairs,
+        cell_type_cols=cell_type_cols,
         stop_early=args.stop_early,
     )
 
