@@ -57,6 +57,8 @@ def compute_diffexp(ladata, cm):
 
     for cell_type_col in cell_type_cols:
 
+        ladata.obs[cell_type_col] = ladata.obs[cell_type_col].astype(str).astype("category")
+
         key_added = "rank_genes_groups"
         sc.tl.rank_genes_groups(ladata, groupby=cell_type_col, method="wilcoxon", layer="logcounts", key_added=key_added)
 
@@ -146,6 +148,7 @@ def compute_diffexp(ladata, cm):
                 cmp = cm.add_comparison([("filter", cell_type_col), ("val", cell_type), ("compare", sample_group_col), ("val", sample_group_left), ("val", sample_group_right)])
                 try:
                     ladata.obs["cell_type_sample_group"] = ladata.obs[cell_type_col].astype(str) + "_" + ladata.obs[sample_group_col].astype(str)
+                    ladata.obs["cell_type_sample_group"] = ladata.obs["cell_type_sample_group"].astype(str).astype("category")
                     sc.tl.rank_genes_groups(ladata, groupby="cell_type_sample_group", groups=[f"{cell_type}_{sample_group_right}"], reference=f"{cell_type}_{sample_group_left}", method="wilcoxon", layer="logcounts", key_added=key_added)
 
                     df = sc.get.rank_genes_groups_df(ladata, group=f"{cell_type}_{sample_group_right}", key=key_added)
