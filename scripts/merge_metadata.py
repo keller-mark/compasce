@@ -1,5 +1,5 @@
-from compasce.io import MultiComparisonMetadata, LazyAnnData
-from compasce import create_o2_dask_client
+from compasce.io import MultiComparisonMetadata, write_zdone
+import zarr
 import argparse
 
 
@@ -9,7 +9,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     zarr_path = args.zarr_path
-    client = create_o2_dask_client(memory_limit='1GB')
 
     cm = MultiComparisonMetadata()
     cm.load_state(zarr_path, include_comparisons=True)
@@ -22,7 +21,8 @@ if __name__ == "__main__":
         'compute_lemur',
     ])
 
-    ladata = LazyAnnData(zarr_path, client=client)
-
-    ladata.uns["comparison_metadata"] = cm.serialize()
-    ladata.save(arr_path=["uns", "comparison_metadata.merged"])
+    z = zarr.open(zarr_path, mode="a")
+    z["/uns/comparison_metadata"] = cm.serialize()
+    z["/uns/comparison_metadata"].attrs["encoding-type"] = "string"
+    z["/uns/comparison_metadata"].attrs["encoding-version"] = "0.2.0"
+    write_zdone(zarr_path, arr_path=["uns", "comparison_metadata.merged"])
