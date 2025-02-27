@@ -2,6 +2,7 @@ from compasce import run_all, create_dask_client, create_o2_dask_client
 from anndata import read_h5ad
 import numpy as np
 import argparse
+import h5py
 
 
 if __name__ == "__main__":
@@ -13,6 +14,8 @@ if __name__ == "__main__":
     parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--stop-early", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
+
+
 
     def get_adata():
         adata = read_h5ad(args.input)
@@ -35,6 +38,16 @@ if __name__ == "__main__":
         # Reference samples are mapped to the empty string in the AdjudicatedCategory column
         adata.obs["AdjudicatedCategory"] = adata.obs["PrimaryAdjudicatedCategory"].apply(lambda v: "Reference" if v == "" else v)
         adata.obs["EnrollmentCategory"] = adata.obs["EnrollementCategory"].apply(lambda v: "Reference" if v in ["LD", "HRT"] else v)
+
+        # Fix categorical columns
+        f = h5py.File(args.input)
+        def fix_categorical_column(colname):
+            categories = f[f"/obs/__categories/{colname}"][()].astype(str)
+            return adata.obs[colname].apply(lambda i: categories[i])
+        
+        adata.obs["celltype"] = fix_categorical_column("celltype")
+        adata.obs["subclass.l1"] = fix_categorical_column("subclass.l1")
+        adata.obs["subclass.l2"] = fix_categorical_column("subclass.l2")
         
         adata.obs = adata.obs.rename(columns={"subclass.l1": "subclass_l1", "subclass.l2": "subclass_l2"})
         return adata
