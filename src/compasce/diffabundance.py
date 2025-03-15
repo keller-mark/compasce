@@ -70,6 +70,8 @@ def compute_diffabundance(ladata, cm):
                 method_params = {
                     "reference_cell_type": sccoda_params["reference_cell_type"],
                     "automatic_reference_absence_threshold": sccoda_params["automatic_reference_absence_threshold"],
+                    "covariate_names": sccoda_params["covariate_names"],
+                    "covariate_value": joint_df.iloc[0]["Covariate"][len(f"{sample_group_col}T."):],
                 }
 
                 uns_key = cmp.append_df("uns", "sccoda_df", method_params, {

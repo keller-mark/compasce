@@ -67,7 +67,10 @@ def compute_diffexp(ladata, cm):
 
         # Reference: https://pertpy.readthedocs.io/en/stable/tutorials/notebooks/enrichment.html#Using-custom-gene-sets
         # Ensure that the gene nomenclature in your target sets is compatible with your .var_names.
-        targets = blitz.enrichr.get_library("GO_Molecular_Function_2021")
+        
+        # targets = blitz.enrichr.get_library("GO_Biological_Process_2021")
+        enrichr_library_name = "Reactome_2022"
+        targets = blitz.enrichr.get_library(enrichr_library_name)
         pt_enricher = Enrichment()
         enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
         #pt_enricher.score(ladata, targets=targets, layer="logcounts", key_added="pertpy_enrichment")
@@ -105,6 +108,7 @@ def compute_diffexp(ladata, cm):
                     "pvals_adj_thresh": .05,
                     "direction": "both",
                     "corr_method": "benjamini-hochberg",
+                    "enrichr_library_name": enrichr_library_name,
                 },
             }, {
                 "obsType": "cell",
@@ -182,6 +186,7 @@ def compute_diffexp(ladata, cm):
                             "pvals_adj_thresh": .05,
                             "direction": "both",
                             "corr_method": "benjamini-hochberg",
+                            "enrichr_library_name": enrichr_library_name,
                         },
                     }, {
                         "obsType": "cell",
