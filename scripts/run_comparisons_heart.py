@@ -38,6 +38,17 @@ if __name__ == "__main__":
         "azimuth_label",
     ]
 
+    def check_pair_has_enough_data(adata, sample_group_pair):
+        [colname, value_pair] = sample_group_pair
+        [left_value, right_value] = value_pair
+        left_num_cells = adata.obs[adata.obs[colname] == left_value].shape[0]
+        right_num_cells = adata.obs[adata.obs[colname] == right_value].shape[0]
+
+        if left_num_cells == 0:
+            print(f"Zero cells for value {left_num_cells} in column {colname}")
+        if right_num_cells == 0:
+            print(f"Zero cells for value {right_num_cells} in column {colname}")
+
     def verify_pair_has_enough_data(adata, sample_group_pair):
         [colname, value_pair] = sample_group_pair
         [left_value, right_value] = value_pair
@@ -53,8 +64,8 @@ if __name__ == "__main__":
         adata_processed = read_h5ad(args.input_processed)
 
         # filter the raw to the processed cells; then append the counts matrix to the processed anndata object
-        cells_in_processed = adata_processed.obs["cell_id"]
-        cell_mask = adata_raw.obs["cell_id"].isin(cells_in_processed)
+        cells_in_processed = adata_processed.obs.index.tolist()
+        cell_mask = adata_raw.obs.index.isin(cells_in_processed)
         adata_raw = adata_raw[cell_mask, :].copy()
         adata_processed.layers["counts"] = adata_raw.X.todense()
         adata = adata_processed
@@ -115,6 +126,8 @@ if __name__ == "__main__":
             return v
         adata.obs["BmiGroup2"] = adata.obs["bmi"].apply(group_bmis2)
 
+        for sample_group_pair in sample_group_pairs:
+            check_pair_has_enough_data(adata, sample_group_pair)
         for sample_group_pair in sample_group_pairs:
             verify_pair_has_enough_data(adata, sample_group_pair)
 
