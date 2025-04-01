@@ -45,9 +45,9 @@ if __name__ == "__main__":
         right_num_cells = adata.obs[adata.obs[colname] == right_value].shape[0]
 
         if left_num_cells == 0:
-            print(f"Zero cells for value {left_num_cells} in column {colname}")
+            print(f"Zero cells for value {left_value} in column {colname}")
         if right_num_cells == 0:
-            print(f"Zero cells for value {right_num_cells} in column {colname}")
+            print(f"Zero cells for value {right_value} in column {colname}")
 
     def verify_pair_has_enough_data(adata, sample_group_pair):
         [colname, value_pair] = sample_group_pair
@@ -55,8 +55,8 @@ if __name__ == "__main__":
         left_num_cells = adata.obs[adata.obs[colname] == left_value].shape[0]
         right_num_cells = adata.obs[adata.obs[colname] == right_value].shape[0]
 
-        assert left_num_cells > 0, f"Zero cells for value {left_num_cells} in column {colname}"
-        assert right_num_cells > 0, f"Zero cells for value {right_num_cells} in column {colname}"
+        assert left_num_cells > 0, f"Zero cells for value {left_value} in column {colname}"
+        assert right_num_cells > 0, f"Zero cells for value {right_value} in column {colname}"
     
 
     def get_adata():
