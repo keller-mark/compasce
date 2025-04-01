@@ -24,9 +24,10 @@ if __name__ == "__main__":
         ('sex', ('Male', 'Female')),
         ('race', ('White', 'Black or African American')),
         ('AgeGroup', ('50 and Above', 'Below 50')),
-        ('BmiGroup', ('Underweight', 'Healthy Weight')),
-        ('BmiGroup', ('Underweight', 'Overweight')),
-        ('BmiGroup', ('Underweight', 'Obesity')),
+        # There are no data points for the Underweight category
+        #('BmiGroup', ('Underweight', 'Healthy Weight')),
+        #('BmiGroup', ('Underweight', 'Overweight')),
+        #('BmiGroup', ('Underweight', 'Obesity')),
         ('BmiGroup', ('Healthy Weight', 'Overweight')),
         ('BmiGroup', ('Healthy Weight', 'Obesity')),
         ('BmiGroup', ('Overweight', 'Obesity')),
