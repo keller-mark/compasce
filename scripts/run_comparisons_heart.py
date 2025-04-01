@@ -33,7 +33,7 @@ if __name__ == "__main__":
         ('BmiGroup2', ('Underweight or Healthy Weight', 'Overweight or Obesity')),
     ]
     cell_type_cols = [
-        "leiden_cluster",
+        "leiden",
         "predicted_label",
         "azimuth_label",
     ]
@@ -86,16 +86,9 @@ if __name__ == "__main__":
             print("NOT SUBSETTING")
 
         # Fix categorical columns
-        f = h5py.File(args.input_processed)
-        def fix_categorical_column(colname):
-            categories = f[f"/obs/__categories/{colname}"][()].astype(str)
-            return adata.obs[colname].apply(lambda i: categories[i])
-        
         for colname in ["azimuth_id", "azimuth_label", "barcode", "cause_of_death", "cl_match_type", "dataset", "hubmap_id", "leiden", "predicted_CLID", "predicted_label", "race", "sex"]:
-            adata.obs[colname] = fix_categorical_column(colname)
+            adata.obs[colname] = adata.obs[colname].astype(str)
         
-        adata.obs["leiden_cluster"] = adata.obs["leiden"].astype(str)
-
         # Cleanup of sample-level data
         def group_ages(v):
             if pd.notna(v):
