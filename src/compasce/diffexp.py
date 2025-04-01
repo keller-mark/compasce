@@ -18,16 +18,22 @@ def extract_pathway_name(s):
     try:
         return s[:s.index("(GO:") - 1]
     except:
-        print(f"Failed to extract pathway name for {s}")
-        return s
+        try:
+            return s[:s.index("R-HSA-") - 1]
+        except:
+            print(f"Failed to extract pathway name for {s}")
+    return s
 
 # TODO: support alternative ontology IDs.
 def extract_pathway_term(s):
     try:
         return s[s.index("(GO:")+1:-1]
     except:
-        print(f"Failed to extract pathway term for {s}")
-        return s
+        try:
+            return "REACTOME:" + s[s.index("R-HSA-"):]
+        except:
+            print(f"Failed to extract pathway name for {s}")
+    return s
     
 def cleanup_hypergeometric_df(df):
     df.index = df.index.rename("pathway")
