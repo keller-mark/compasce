@@ -17,6 +17,36 @@ if __name__ == "__main__":
     parser.add_argument("--stop-early", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
+    # For HT_raw and HT_processed files
+    donor_id_col = ""
+    sample_id_col = "hubmap_id"
+    sample_group_pairs = [
+        ('sex', ('Male', 'Female')),
+        ('race', ('White', 'Black or African American')),
+        ('AgeGroup', ('50 and Above', 'Below 50')),
+        ('BmiGroup', ('Underweight', 'Healthy Weight')),
+        ('BmiGroup', ('Underweight', 'Overweight')),
+        ('BmiGroup', ('Underweight', 'Obesity')),
+        ('BmiGroup', ('Healthy Weight', 'Overweight')),
+        ('BmiGroup', ('Healthy Weight', 'Obesity')),
+        ('BmiGroup', ('Overweight', 'Obesity')),
+        ('BmiGroup2', ('Underweight or Healthy Weight', 'Overweight or Obesity')),
+    ]
+    cell_type_cols = [
+        "leiden_cluster",
+        "predicted_label",
+        "azimuth_label",
+    ]
+
+    def verify_pair_has_enough_data(adata, sample_group_pair):
+        [colname, value_pair] = sample_group_pair
+        [left_value, right_value] = value_pair
+        left_num_cells = adata.obs[adata.obs[colname] == left_value].shape[0]
+        right_num_cells = adata.obs[adata.obs[colname] == right_value].shape[0]
+
+        assert left_num_cells > 0, f"Zero cells for value {left_num_cells} in column {colname}"
+        assert right_num_cells > 0, f"Zero cells for value {right_num_cells} in column {colname}"
+    
 
     def get_adata():
         adata_raw = read_h5ad(args.input_raw)
@@ -85,28 +115,10 @@ if __name__ == "__main__":
             return v
         adata.obs["BmiGroup2"] = adata.obs["bmi"].apply(group_bmis2)
 
-        return adata
+        for sample_group_pair in sample_group_pairs:
+            verify_pair_has_enough_data(adata, sample_group_pair)
 
-    # For HT_raw and HT_processed files
-    donor_id_col = ""
-    sample_id_col = "hubmap_id"
-    sample_group_pairs = [
-        ('sex', ('Male', 'Female')),
-        ('race', ('White', 'Black or African American')),
-        ('AgeGroup', ('50 and Above', 'Below 50')),
-        ('BmiGroup', ('Underweight', 'Healthy Weight')),
-        ('BmiGroup', ('Underweight', 'Overweight')),
-        ('BmiGroup', ('Underweight', 'Obesity')),
-        ('BmiGroup', ('Healthy Weight', 'Overweight')),
-        ('BmiGroup', ('Healthy Weight', 'Obesity')),
-        ('BmiGroup', ('Overweight', 'Obesity')),
-        ('BmiGroup2', ('Underweight or Healthy Weight', 'Overweight or Obesity')),
-    ]
-    cell_type_cols = [
-        "leiden_cluster",
-        "predicted_label",
-        "azimuth_label",
-    ]
+        return adata
 
     ladata = run_all(
         get_adata,
