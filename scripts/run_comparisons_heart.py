@@ -86,7 +86,7 @@ if __name__ == "__main__":
             print("NOT SUBSETTING")
 
         # Fix categorical columns
-        f = h5py.File(args.input)
+        f = h5py.File(args.input_processed)
         def fix_categorical_column(colname):
             categories = f[f"/obs/__categories/{colname}"][()].astype(str)
             return adata.obs[colname].apply(lambda i: categories[i])
