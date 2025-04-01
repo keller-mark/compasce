@@ -97,7 +97,7 @@ if __name__ == "__main__":
                     return "50 and Above"
                 elif v < 50:
                     return "Below 50"
-            return v
+            return "NA"
 
         # Reference: https://www.cdc.gov/bmi/adult-calculator/bmi-categories.html
         def group_bmis(v):
@@ -110,7 +110,7 @@ if __name__ == "__main__":
                     return "Overweight"
                 elif v >= 30:
                     return "Obesity"
-            return v
+            return "NA"
 
         adata.obs["AgeGroup"] = adata.obs["age"].apply(group_ages)
         adata.obs["BmiGroup"] = adata.obs["bmi"].apply(group_bmis)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     return "Underweight or Healthy Weight"
                 elif v >= 25:
                     return "Overweight or Obesity"
-            return v
+            return "NA"
         adata.obs["BmiGroup2"] = adata.obs["bmi"].apply(group_bmis2)
 
         for sample_group_pair in sample_group_pairs:
