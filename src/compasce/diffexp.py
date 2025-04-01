@@ -72,7 +72,12 @@ def compute_diffexp(ladata, cm):
         enrichr_library_name = "Reactome_2022"
         targets = blitz.enrichr.get_library(enrichr_library_name)
         pt_enricher = Enrichment()
-        enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+        try:
+            enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+        except ZeroDivisionError as e:
+            enrichment_dict = {}
+            print("Error running hypergeometric: division by zero")
+            print(e)
         #pt_enricher.score(ladata, targets=targets, layer="logcounts", key_added="pertpy_enrichment")
         # Returns a dictionary with clusters as keys and data frames of test results sorted on q-value as the items.
         #enrichment = pt_enricher.gsea(ladata, targets=targets, key_added="pertpy_enrichment_gsea")
@@ -98,24 +103,25 @@ def compute_diffexp(ladata, cm):
             ladata.uns[uns_key] = df
 
             # Compute gene enrichment.
-            enrichment_df = enrichment_dict[cell_type]
-            enrichment_df = cleanup_hypergeometric_df(enrichment_df)
+            enrichment_df = enrichment_dict.get(cell_type)
+            if enrichment_df is not None:
+                enrichment_df = cleanup_hypergeometric_df(enrichment_df)
 
-            uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
-                "rank_genes_groups": ladata.uns[key_added]["params"],
-                "pertpy_hypergeometric": {
-                    "group": cell_type,
-                    "pvals_adj_thresh": .05,
-                    "direction": "both",
-                    "corr_method": "benjamini-hochberg",
-                    "enrichr_library_name": enrichr_library_name,
-                },
-            }, {
-                "obsType": "cell",
-                "featureType": "pathway",
-                "obsSetSelection": [[cell_type_col, cell_type]],
-            })
-            ladata.uns[uns_key] = enrichment_df
+                uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
+                    "rank_genes_groups": ladata.uns[key_added]["params"],
+                    "pertpy_hypergeometric": {
+                        "group": cell_type,
+                        "pvals_adj_thresh": .05,
+                        "direction": "both",
+                        "corr_method": "benjamini-hochberg",
+                        "enrichr_library_name": enrichr_library_name,
+                    },
+                }, {
+                    "obsType": "cell",
+                    "featureType": "pathway",
+                    "obsSetSelection": [[cell_type_col, cell_type]],
+                })
+                ladata.uns[uns_key] = enrichment_df
             
             try:
                 # Run sc.queries.enrich on the results.
@@ -174,28 +180,34 @@ def compute_diffexp(ladata, cm):
 
                     # Compute gene enrichment.
                     pt_enricher = Enrichment()
-                    enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+                    try:
+                        enrichment_dict = pt_enricher.hypergeometric(ladata, targets=targets)
+                    except ZeroDivisionError as e:
+                        enrichment_dict = {}
+                        print("Error running hypergeometric: division by zero")
+                        print(e)
 
-                    enrichment_df = enrichment_dict[f"{cell_type}_{sample_group_right}"]
-                    enrichment_df = cleanup_hypergeometric_df(enrichment_df)
+                    enrichment_df = enrichment_dict.get(f"{cell_type}_{sample_group_right}")
+                    if enrichment_df is not None:
+                        enrichment_df = cleanup_hypergeometric_df(enrichment_df)
 
-                    uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
-                        "rank_genes_groups": ladata.uns[key_added]["params"],
-                        "pertpy_hypergeometric": {
-                            "group": f"{cell_type}_{sample_group_right}",
-                            "pvals_adj_thresh": .05,
-                            "direction": "both",
-                            "corr_method": "benjamini-hochberg",
-                            "enrichr_library_name": enrichr_library_name,
-                        },
-                    }, {
-                        "obsType": "cell",
-                        "featureType": "pathway",
-                        "obsSetFilter": [[cell_type_col, cell_type]],
-                        "sampleSetSelection": [[sample_group_col, sample_group_right]],
-                        "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
-                    })
-                    ladata.uns[uns_key] = enrichment_df
+                        uns_key = cmp.append_df("uns", "pertpy_hypergeometric", {
+                            "rank_genes_groups": ladata.uns[key_added]["params"],
+                            "pertpy_hypergeometric": {
+                                "group": f"{cell_type}_{sample_group_right}",
+                                "pvals_adj_thresh": .05,
+                                "direction": "both",
+                                "corr_method": "benjamini-hochberg",
+                                "enrichr_library_name": enrichr_library_name,
+                            },
+                        }, {
+                            "obsType": "cell",
+                            "featureType": "pathway",
+                            "obsSetFilter": [[cell_type_col, cell_type]],
+                            "sampleSetSelection": [[sample_group_col, sample_group_right]],
+                            "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
+                        })
+                        ladata.uns[uns_key] = enrichment_df
 
                     try:
                         # Run sc.queries.enrich on the results.
