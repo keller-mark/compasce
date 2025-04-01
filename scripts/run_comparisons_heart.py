@@ -66,8 +66,12 @@ if __name__ == "__main__":
         # filter the raw to the processed cells; then append the counts matrix to the processed anndata object
         cells_in_processed = adata_processed.obs.index.tolist()
         cell_mask = adata_raw.obs.index.isin(cells_in_processed)
-        adata_raw = adata_raw[cell_mask, :].copy()
-        adata_processed.layers["counts"] = adata_raw.X.todense()
+
+        genes_in_processed = adata_processed.var.index.tolist()
+        gene_mask = adata_raw.var.index.isin(genes_in_processed)
+
+        filtered_adata_raw = adata_raw[cell_mask, gene_mask].copy()
+        adata_processed.layers["counts"] = filtered_adata_raw.X.todense()
         adata = adata_processed
 
         should_subset = args.subset

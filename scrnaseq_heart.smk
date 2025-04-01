@@ -162,8 +162,8 @@ rule download_proc_h5ad:
     file_url="https://hubmap-data-products.s3.amazonaws.com/4ea0c58e-13a9-41fd-b698-de9124c02873/HT_processed.h5ad"
   resources:
     slurm_partition="short",
-    runtime=60*2, # 2 hours
-    mem_mb=120_000, # 120 GB
+    runtime=60*1, # 1 hour
+    mem_mb=16_000, # 16 GB
     cpus_per_task=2
   shell:
     """
@@ -177,8 +177,8 @@ rule download_raw_h5ad:
     file_url="https://hubmap-data-products.s3.amazonaws.com/4ea0c58e-13a9-41fd-b698-de9124c02873/HT_raw.h5ad"
   resources:
     slurm_partition="short",
-    runtime=60*2, # 2 hours
-    mem_mb=120_000, # 120 GB
+    runtime=60*1, # 1 hour
+    mem_mb=16_000, # 16 GB
     cpus_per_task=2
   shell:
     """
