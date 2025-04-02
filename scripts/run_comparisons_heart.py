@@ -75,6 +75,11 @@ if __name__ == "__main__":
         adata_processed.layers["counts"] = filtered_adata_raw.X.todense()
         adata = adata_processed
 
+        # Use Gene Symbols rather than ENSEMBL IDs for gene IDs.
+        adata.var.index = adata.var.index.rename('ensembl_id')
+        adata.var = adata.var.reset_index().set_index('hugo_symbol')
+        # TODO: do we need to subset the object to non-duplicate, non-NA gene symbols?
+
         should_subset = args.subset
         if should_subset:
             print("SUBSETTING")
