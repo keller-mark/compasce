@@ -15,24 +15,20 @@ def cleanup_rank_genes_groups_df(df):
 
 # TODO: support alternative ontology IDs.
 def extract_pathway_name(s):
-    try:
-        return s[:s.index("(GO:") - 1]
-    except:
-        try:
-            return s[:s.index("R-HSA-") - 1]
-        except:
-            print(f"Failed to extract pathway name for {s}")
+    if "(GO:" in s:
+        return s[:s.index("(GO:")-1]
+    if "R-HSA-" in s:
+        return s[:s.index("R-HSA-")-1]
+    print(f"Failed to extract pathway name for {s}")
     return s
 
 # TODO: support alternative ontology IDs.
 def extract_pathway_term(s):
-    try:
+    if "(GO:" in s:
         return s[s.index("(GO:")+1:-1]
-    except:
-        try:
-            return "REACTOME:" + s[s.index("R-HSA-"):]
-        except:
-            print(f"Failed to extract pathway name for {s}")
+    if "R-HSA-" in s:
+        return "REACTOME:" + s[s.index("R-HSA-"):]
+    print(f"Failed to extract pathway name for {s}")
     return s
     
 def cleanup_hypergeometric_df(df):
