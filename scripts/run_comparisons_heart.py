@@ -71,14 +71,22 @@ if __name__ == "__main__":
         genes_in_processed = adata_processed.var.index.tolist()
         gene_mask = adata_raw.var.index.isin(genes_in_processed)
 
+
+
         filtered_adata_raw = adata_raw[cell_mask, gene_mask].copy()
         adata_processed.layers["counts"] = filtered_adata_raw.X.todense()
         adata = adata_processed
 
+        
+        # First subset the object to non-duplicate, non-NA gene symbols
+        non_na_genes = adata.var['hugo_symbol'].notna()
+        duplicate_genes = adata.var['hugo_symbol'].duplicated(keep='first')
+        valid_genes = non_na_genes & ~duplicate_genes
+        adata = adata[:, valid_genes].copy()
+
         # Use Gene Symbols rather than ENSEMBL IDs for gene IDs.
         adata.var.index = adata.var.index.rename('ensembl_id')
         adata.var = adata.var.reset_index().set_index('hugo_symbol')
-        # TODO: do we need to subset the object to non-duplicate, non-NA gene symbols?
 
         should_subset = args.subset
         if should_subset:
