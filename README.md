@@ -236,6 +236,14 @@ snakemake --snakefile scrnaseq.smk -j 10 --rerun-triggers mtime \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
 ```
 
+For HuBMAP:
+
+```sh
+snakemake --snakefile scrnaseq_heart.smk -j 10 --rerun-triggers mtime \
+  --keep-incomplete --keep-going --latency-wait 30 --slurm \
+  --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
+```
+
 <!--
 This script took approximately 48 hours to complete with 160 GB of RAM.
 It is not yet optimized to run independent pipeline steps in parallel.

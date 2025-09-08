@@ -629,7 +629,7 @@ requires-dist = [
     { name = "pandas" },
     { name = "pertpy", marker = "extra == 'dev'" },
     { name = "pertpy", extras = ["de", "coda"], git = "https://github.com/keller-mark/pertpy?rev=3f34fbe" },
-    { name = "pylemur", git = "https://github.com/keller-mark/pyLemur?rev=40c9530" },
+    { name = "pylemur", git = "https://github.com/keller-mark/pyLemur?rev=94b03c7" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.2.4" },
     { name = "pytest-memray", marker = "extra == 'dev'" },
     { name = "requests", marker = "extra == 'dev'" },
@@ -3351,7 +3351,7 @@ wheels = [
 [[package]]
 name = "pylemur"
 version = "0.3.1"
-source = { git = "https://github.com/keller-mark/pyLemur?rev=40c9530#40c95305f6c0404613c1e7c4fff04406ee6df669" }
+source = { git = "https://github.com/keller-mark/pyLemur?rev=94b03c7#94b03c7af1b45c3292394ffb2c60877abc5e458b" }
 dependencies = [
     { name = "anndata" },
     { name = "formulaic" },
