@@ -56,6 +56,8 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
         ladata.save(arr_path=["uns", "comparison_metadata"])
         return ladata
     
+    # TODO: for KPMP, fill in pre-processed differential expression results here? Or during the compute_diffexp step?
+    # Or, just fill in at the end, after the normal pipeline has finished?
 
     # depends on: uns/write_metadata/layers/counts
     # creates: uns/write_metadata/layers/logcounts
