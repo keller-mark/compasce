@@ -34,14 +34,28 @@ if __name__ == "__main__":
             print("NOT SUBSETTING")
         
         adata.layers["counts"] = adata.layers["counts"].todense()
+        if isinstance(adata.layers["counts"], np.matrix):
+            adata.layers["counts"] = np.array(adata.layers["counts"])
 
         # Join adata.obs with clinical data from CSV
         clinical_data = pd.read_csv(args.input_csv)
+
         adata.obs = adata.obs.merge(clinical_data, left_on="patient", right_on="Participant ID", how="left")
+
+        # We could have done a left join, but then we would have to filter out samples that do not have clinical data later.
+        # We also do not want strings to be converted to NaN, as these cause Zarr writing errors like "TypeError: expected unicode string, found nan".
+
+        # This effectively does an inner join. We cannot use how="inner", since this would only affect adata.obs, and not other anndata fields.
+        has_clinical_data = ~adata.obs["Participant ID"].isna()
+        adata = adata[has_clinical_data, :].copy()
+
+        print(adata.obs.head())
+
+        adata.obs["Primary Adjudicated Category"] = adata.obs["Primary Adjudicated Category"].fillna("NA")
 
         # Cleanup of sample-level data
         def clean_adjudicated_category(row):
-            if row["Primary Adjudicated Category"] != "":
+            if row["Primary Adjudicated Category"] != "NA":
                 return row["Primary Adjudicated Category"]
             else:
                 # The row was empty, so perhaps this sample has not yet been adjudicated.
@@ -56,6 +70,17 @@ if __name__ == "__main__":
         # TODO: process other clinical columns? Sex, age group, etc.
 
         adata.obs = adata.obs.rename(columns={"subclass.l1": "subclass_l1", "subclass.l2": "subclass_l2", "subclass.l3": "subclass_l3"})
+        
+        for colname in adata.obs.columns:
+            if pd.api.types.is_string_dtype(adata.obs[colname]) or str(adata.obs[colname].dtype) == "object":
+                print(f"Filling NAs in string column {colname} with 'NA'")
+                adata.obs[colname] = adata.obs[colname].fillna("NA")
+            else:
+                print(f"Not filling NAs in non-string column {colname} of type {adata.obs[colname].dtype}")
+        
+        # Column names cannot contain slashes
+        adata.obs = adata.obs.rename(columns=dict(zip(adata.obs.columns, [c.replace("/", " per ") for c in adata.obs.columns])))
+
         return adata
 
     donor_id_col = "patient"

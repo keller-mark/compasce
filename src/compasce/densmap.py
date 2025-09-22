@@ -8,7 +8,11 @@ def densmap(ladata, cm, random_state=1234):
         return ladata
 
     # Map a particular layer to X, to trick the scanpy functions that only work with X.
-    # ladata.set_alias(on_disk_path=["layers", "logcounts"], in_mem_path=["X"])
+    if not "X_pca" in ladata.obsm.keys():
+        # sc.pp.neighbors requires PCA to be present.
+        ladata.set_alias(on_disk_path=["layers", "logcounts"], in_mem_path=["X"])
+        sc.tl.pca(ladata, random_state=random_state)
+        ladata.save(arr_path=["obsm", "X_pca"])
     
     # Neighbors will choose between usage of /X or /obsm/X_pca unless use_rep is used.
     sc.pp.neighbors(ladata, random_state=random_state, n_neighbors=30)

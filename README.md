@@ -142,7 +142,7 @@ uv sync --extra dev
 or
 
 ```sh
-conda create -n compasce-env python=3.10
+conda create -n compasce-env python=3.11
 conda activate compasce-env
 pip install -e .
 ```
@@ -243,6 +243,15 @@ snakemake --snakefile scrnaseq_heart.smk -j 10 --rerun-triggers mtime \
   --keep-incomplete --keep-going --latency-wait 30 --slurm \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
 ```
+
+For KPMP Explorer:
+
+```sh
+snakemake --snakefile scrnaseq_kpmp.smk -j 10 --rerun-triggers mtime \
+  --keep-incomplete --keep-going --latency-wait 30 --slurm \
+  --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
+```
+
 
 <!--
 This script took approximately 48 hours to complete with 160 GB of RAM.

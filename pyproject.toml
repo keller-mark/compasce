@@ -11,7 +11,7 @@ authors = [
 description = "Preprocessing functions that support comparison of single-cell data"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["single-cell"]
 classifiers = [
   'Development Status :: 4 - Beta',
@@ -39,7 +39,7 @@ dependencies = [
   'joblib',
   'scikit-learn>=1.5.1',
   'gprofiler-official',
-  "mudata==0.3.1",
+  #"mudata==0.3.1",
 ]
 
 [project.optional-dependencies]
@@ -49,7 +49,7 @@ dev = [
   'pytest-memray',
   'flake8==3.8.4',
   'jupyterlab',
-  # 'snakemake<=8.0.0',
+  'snakemake',
   'pertpy',
   'requests',
   'altair',
