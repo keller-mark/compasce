@@ -7,7 +7,7 @@ from .io.lazy_anndata import create_lazy_anndata, create_sample_df
 from .io.comparison_metadata import MultiComparisonMetadata
 
 
-def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=None, donor_id_col=None, sample_group_pairs=None, cell_type_cols=None, stop_early=False):
+def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=None, donor_id_col=None, sample_group_pairs=None, cell_type_cols=None, stop_early=False, input_deg_dir=None):
     """
     def get_adata():
         return read_h5ad("path/to/adata.h5ad")
@@ -73,7 +73,7 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
 
     densmap(ladata, cm)
 
-    compute_diffexp(ladata, cm)
+    compute_diffexp(ladata, cm, input_deg_dir=input_deg_dir)
 
     ladata.uns["comparison_metadata"] = cm.serialize()
     ladata.save()

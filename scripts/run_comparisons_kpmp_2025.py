@@ -10,6 +10,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-h5ad", type=str, required=True, help = "Path to KPMP H5AD file from Globus, august 2025.")
     parser.add_argument("--input-csv", type=str, required=True, help = "Path to KPMP clinical data CSV file.")
+    parser.add_argument("--input-deg-dir", type=str, required=True, help = "Path to folder containing precomputed DEG .txt files.")
     parser.add_argument("--output", type=str, required=True, help = "Path to output zarr store directory")
     parser.add_argument("--subset", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
@@ -108,9 +109,9 @@ if __name__ == "__main__":
         # TODO: use Diabetes History and Hypertension History columns here.
     ]
     cell_type_cols = [
-        "subclass_l1",
-        "subclass_l2",
         "subclass_l3",
+        "subclass_l2",
+        "subclass_l1",
     ]
 
     ladata = run_all(
@@ -123,6 +124,7 @@ if __name__ == "__main__":
         sample_group_pairs=sample_group_pairs,
         cell_type_cols=cell_type_cols,
         stop_early=args.stop_early,
+        input_deg_dir=args.input_deg_dir,
     )
 
     print("Done")

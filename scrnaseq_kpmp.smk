@@ -14,7 +14,7 @@ rule merge_metadata:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
+    #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"), # TODO: temp
     #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")
@@ -51,7 +51,8 @@ rule compute_lemur:
 
 rule compute_diffexp:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+    metadata_path=join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    deg_dir=join(RAW_DIR, "kpmp-aug-2025")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
   resources:
@@ -63,6 +64,7 @@ rule compute_diffexp:
     """
     compasce \
         --zarr-path {ZARR_PATH} \
+        --input-deg-dir {input.deg_dir} \
         --function-name "compute_diffexp"
     """
 
@@ -137,7 +139,8 @@ rule normalize_basic:
 rule convert_to_zarr:
   input:
     h5ad=join(RAW_DIR, "kpmp-aug-2025", "SingleNucleus_KPMP_Explorer_05182025.h5ad"),
-    clinical=join(RAW_DIR, "kpmp-aug-2025", "20250606_OpenAccessClinicalData.csv")
+    clinical=join(RAW_DIR, "kpmp-aug-2025", "20250606_OpenAccessClinicalData.csv"),
+    deg_dir=join(RAW_DIR, "kpmp-aug-2025")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata")
   resources:
@@ -150,9 +153,10 @@ rule convert_to_zarr:
     python scripts/run_comparisons_kpmp_2025.py \
         --input-h5ad {input.h5ad} \
         --input-csv {input.clinical} \
+        --input-deg-dir {input.deg_dir} \
         --output {ZARR_PATH} \
         --stop-early \
-        --no-subset
+        --subset # TODO: temp
     """
 
 # No download rule:
