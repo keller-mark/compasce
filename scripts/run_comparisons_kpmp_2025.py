@@ -33,10 +33,6 @@ if __name__ == "__main__":
             adata = adata[obs_subset, var_slice].copy()
         else:
             print("NOT SUBSETTING")
-        
-        adata.layers["counts"] = adata.layers["counts"].todense()
-        if isinstance(adata.layers["counts"], np.matrix):
-            adata.layers["counts"] = np.array(adata.layers["counts"])
 
         # Join adata.obs with clinical data from CSV
         clinical_data = pd.read_csv(args.input_csv)
@@ -81,6 +77,9 @@ if __name__ == "__main__":
         
         # Column names cannot contain slashes
         adata.obs = adata.obs.rename(columns=dict(zip(adata.obs.columns, [c.replace("/", " per ") for c in adata.obs.columns])))
+
+        # Reference: https://stackoverflow.com/questions/30416695/numpy-and-scipy-difference-between-todense-and-toarray
+        adata.layers["counts"] = adata.layers["counts"].toarray()
 
         return adata
 

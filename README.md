@@ -263,10 +263,9 @@ pip install -e ".[dev]"
 ```
 
 ```sh
-
 conda activate compasce-env2
+export SLURM_ACCOUNT=$(sshare -u mk596 -U | cut -d ' ' -f 1 | tail -n 1)
 
-# Request interactive session with lots of memory
 snakemake --snakefile scrnaseq_kpmp.smk -j 10 --rerun-triggers mtime \
   --keep-incomplete --keep-going --latency-wait 30 --slurm \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
