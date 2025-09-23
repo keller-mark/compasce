@@ -131,8 +131,7 @@ class LazyAnnData(AnnData):
     def copy_layer(self, src_key, dest_key):
         zarr.copy(self.z[f"/layers/{src_key}"], self.z["/layers"], name=dest_key)
 
-    def get_da_from_zarr_layer(self, layer_key):
-        X_path = f"/layers/{layer_key}"
+    def get_da_from_zarr_array(self, X_path):
 
         if self.client is None:
             raise ValueError("A Dask client must be provided to use get_da_from_zarr_layer")
@@ -145,6 +144,12 @@ class LazyAnnData(AnnData):
         # which causes the task graph to be too large.
         X_dask = da.from_zarr(url=self.zarr_path, component=X_path, chunks=z.chunks, inline_array=False)
         return X_dask
+    
+    def get_da_from_zarr_layer(self, layer_key):
+        return self.get_da_from_zarr_array(f"/layers/{layer_key}")
+    
+    def get_da_from_zarr_obsm(self, layer_key):
+        return self.get_da_from_zarr_array(f"/obsm/{layer_key}")
 
     def put_da_to_zarr_layer(self, layer_key, X_dask):
         X_path = f"/layers/{layer_key}"

@@ -13,7 +13,11 @@ def compute_lemur(ladata, cm):
     sample_group_pairs = cm.sample_group_pairs
 
     def get_input_arr():
-        return ladata.get_da_from_zarr_layer("logcounts")
+        return ladata.get_da_from_zarr_obsm("logcounts_hvg")
+    
+    # We need to trick PyLemur into using the array at layers/logcounts_hvg despite being located in `obsm`
+    # because after subsetting to HVGs the shape does not match `X.shape`, preventing storage in `layers`
+    # ladata.set_alias(on_disk_path=["obsm", "logcounts_hvg"], in_mem_path=["layers", "logcounts_hvg"])
     
     # Dict of { col1: [(l1, r1), (l2, r2), ...] }
     sample_group_pairs_by_col = {}
@@ -27,15 +31,21 @@ def compute_lemur(ladata, cm):
 
     for sample_group_col, sample_group_pair_list in sample_group_pairs_by_col.items():
         cmp = cm.add_comparison([("compare", sample_group_col)])
-        model = pylemur.tl.LEMUR(ladata, get_input_arr, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
-        # model = pylemur.tl.LEMUR(ladata, design = f"~ {sample_group_col}", n_embedding=15, layer = "logcounts", copy=False)
+        model = pylemur.tl.LEMUR(
+            ladata,
+            get_input_arr,
+            design = f"~ {sample_group_col}",
+            n_embedding=15,
+            layer = "logcounts_hvg",
+            copy=False
+        )
         model.fit()
         model.align_with_harmony()
 
         method_params = {
             "design": f"~ {sample_group_col}",
             "n_embedding": 15,
-            "layer": "logcounts"
+            "input_arr": "/obsm/logcounts_hvg"
         }
 
         # Recalculate the DensMAP on the embedding calculated by LEMUR
