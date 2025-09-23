@@ -127,7 +127,7 @@ rule normalize_basic:
   resources:
     slurm_partition="short",
     runtime=60*2, # 2 hours
-    mem_mb=120_000, # 120 GB
+    mem_mb=240_000, # 120 GB
     cpus_per_task=2
   shell:
     """

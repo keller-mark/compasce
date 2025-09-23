@@ -78,6 +78,21 @@ if __name__ == "__main__":
         # Column names cannot contain slashes
         adata.obs = adata.obs.rename(columns=dict(zip(adata.obs.columns, [c.replace("/", " per ") for c in adata.obs.columns])))
 
+        # TODO: Use dask to convert the scipy.sparse array to a dense numpy array, to avoid this memory spike?
+        # TODO: Also use LazyAnnData.put_da_to_zarr_layer to save the dense array?
+        # # Perhaps save "counts" to "counts_sparse" layer first, then convert to dense, then save result to "counts" layer.
+        # dask_sparse_array = da.from_array(large_sparse_array, chunks=(1000, 1000))
+        # # Define a function to convert a sparse chunk to a dense NumPy array
+        # def sparse_to_dense_chunk(chunk):
+        #     return chunk.toarray()
+        # # Apply the function to each block using map_blocks
+        # # The 'meta' argument helps Dask infer the output type and shape
+        # dask_dense_array = dask_sparse_array.map_blocks(
+        #     sparse_to_dense_chunk,
+        #     dtype=large_sparse_array.dtype,
+        #     meta=np.array([]) # Dask expects a NumPy array for meta
+        # )
+
         # Reference: https://stackoverflow.com/questions/30416695/numpy-and-scipy-difference-between-todense-and-toarray
         adata.layers["counts"] = adata.layers["counts"].toarray()
 
