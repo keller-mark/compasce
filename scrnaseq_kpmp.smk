@@ -14,7 +14,7 @@ rule merge_metadata:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
-    #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"), # TODO: temp
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
     #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.merged")

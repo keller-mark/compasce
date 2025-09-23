@@ -244,9 +244,29 @@ snakemake --snakefile scrnaseq_heart.smk -j 10 --rerun-triggers mtime \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
 ```
 
-For KPMP Explorer:
+#### For KPMP Explorer data processing
+
+On o2, download the raw data from S3:
 
 ```sh
+srun -p interactive --pty -t 3:00:00 -n 1 --mem 16G bash
+# source ~/.bashrc_mark
+# ssh-add
+cd ~/lab/scmd-analysis/raw
+mkdir kpmp-aug-2025
+cd kpmp-aug-2025
+
+aws s3 cp s3://vitessce-data-v2/kpmp-atlas-v2/sn-rna-seq/raw . --recursive
+
+conda create -n compasce-env python=3.11
+pip install -e ".[dev]"
+```
+
+```sh
+
+conda activate compasce-env2
+
+# Request interactive session with lots of memory
 snakemake --snakefile scrnaseq_kpmp.smk -j 10 --rerun-triggers mtime \
   --keep-incomplete --keep-going --latency-wait 30 --slurm \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
