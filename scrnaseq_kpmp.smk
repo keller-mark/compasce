@@ -58,7 +58,7 @@ rule compute_diffexp:
   resources:
     slurm_partition="medium",
     runtime=60*24*3, # 3 days
-    mem_mb=160_000, # 160 GB
+    mem_mb=240_000, # 240 GB
     cpus_per_task=4
   shell:
     """
