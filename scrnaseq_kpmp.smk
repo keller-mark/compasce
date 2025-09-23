@@ -155,8 +155,7 @@ rule convert_to_zarr:
         --input-csv {input.clinical} \
         --input-deg-dir {input.deg_dir} \
         --output {ZARR_PATH} \
-        --stop-early \
-        --subset # TODO: temp
+        --stop-early
     """
 
 # No download rule:
