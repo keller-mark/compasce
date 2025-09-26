@@ -57,7 +57,7 @@ rule compute_diffexp:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp")
   resources:
     slurm_partition="medium",
-    runtime=60*24*3, # 3 days
+    runtime=60*24*5, # 5 days
     mem_mb=240_000, # 240 GB
     cpus_per_task=4
   shell:
