@@ -62,6 +62,10 @@ def compute_diffabundance(ladata, cm):
                 # Reference: https://github.com/scverse/pertpy/blob/0c7e18094e5b9b2a127696f383652ec9b489284a/pertpy/tools/_coda/_base_coda.py#L1123C9-L1123C45
                 effect_df["is_credible_effect"] = effect_df["Final Parameter"] != 0
 
+                # Ensure both cell type / index columns have the same name.
+                effect_df.index = effect_df.index.rename("Cell Type")
+                intercept_df.index = intercept_df.index.rename("Cell Type")
+
                 joint_df = pd.merge(effect_df, intercept_df, on="Cell Type", suffixes=('_effect', '_intercept'), validate="one_to_one")
                 
                 assert joint_df.shape[0] == effect_df.shape[0] # Should have the same number of rows.

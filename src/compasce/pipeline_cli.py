@@ -13,6 +13,7 @@ from .io.comparison_metadata import MultiComparisonMetadata
 def run_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--zarr-path", type=str, help="Path to zarr store")
+    parser.add_argument("--input-deg-dir", type=str, required=False, help = "Path to folder containing precomputed DEG .txt files.")
     parser.add_argument("--mem-limit", type=str, default='16GB', required=False)
     parser.add_argument("--n-workers", type=int, default=2, required=False)
     parser.add_argument("--threads-per-worker", type=int, default=2, required=False)
@@ -50,8 +51,12 @@ def run_cli():
 
     ladata = LazyAnnData(zarr_path, client=client)
 
-    func_to_run(ladata, cm)
-    
+    kwargs = {}
+    if function_name == "compute_diffexp":
+        kwargs["input_deg_dir"] = args.input_deg_dir
+
+    func_to_run(ladata, cm, **kwargs)
+
     ladata.uns[f"comparison_metadata.{function_name}"] = cm.serialize()
     ladata.save(arr_path=["uns", f"comparison_metadata.{function_name}"])
 

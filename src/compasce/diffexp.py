@@ -1,3 +1,4 @@
+from os.path import join
 import scanpy as sc
 import pandas as pd
 import numpy as np
@@ -48,8 +49,11 @@ def cleanup_enrich_df(df):
     df = df.set_index("pathway_term")
     return df
 
-def compute_diffexp(ladata, cm):
+def compute_diffexp(ladata, cm, input_deg_dir=None):
     print(f"Running diffexp tests for cell types vs rest")
+
+    # This is only for KPMP Explorer, to append precomputed DEG results.
+    should_load_precomputed_results = input_deg_dir is not None
 
     # Check for a .zdone file
     if ladata.has_zdone(["uns", "compute_diffexp"]):
@@ -103,6 +107,68 @@ def compute_diffexp(ladata, cm):
                 "obsSetSelection": [[cell_type_col, cell_type]],
             })
             ladata.uns[uns_key] = df
+
+            print(df.head())
+
+            # For KPMP Explorer, append all-samples DEG results.
+            if should_load_precomputed_results:
+                if cell_type_col == "subclass_l3":
+                    sample_group_acronyms = ["All-Samples", "AKI", "CKD", "HRT"]
+                    acronym_to_full_map = {
+                        "AKI": "AKI",
+                        "CKD": "CKD",
+                        "HRT": "Healthy Reference",
+                    }
+
+                    for sample_group_acronym in sample_group_acronyms:
+                        sample_group_col = "EnrollmentCategory"
+                        sample_group_value = acronym_to_full_map.get(sample_group_acronym)
+                        if sample_group_acronym != "All-Samples":
+                            cmp = cm.add_comparison([("filter", sample_group_col), ("val", sample_group_value), ("compare", cell_type_col), ("val", cell_type), "__rest__"])
+                        # Load the all-samples results
+                        df_path = join(input_deg_dir, f"SingleNucleus_KPMP_Explorer_subclass.l3_DEGs_{sample_group_acronym}.txt")
+                        precomputed_df = pd.read_csv(df_path, sep="\t")
+                        print(precomputed_df.head())
+
+                        # orig colnames: index gene  p_val  p_val_adj  avg_log2FC  pct.1  pct.2  avg_logExp cluster
+                        # "cluster" column = cell type (subclass_l3)
+
+                        # We want to convert it to the following format:
+                        """
+                                    scores  logfoldchanges          pvals      pvals_adj
+                        names
+                        SLC12A1   35.634079        7.572658  4.157895e-278  1.521291e-273
+                        UMOD      32.774536        6.383070  1.358081e-235  2.484474e-231
+                        EGF       32.237804        7.383382  5.214713e-228  6.359864e-224
+                        ESRRG     30.856678        3.852248  4.557509e-209  4.168753e-205
+                        CACNA2D3  30.428173        6.458777  2.329620e-203  1.704723e-199
+                        """
+
+                        precomputed_df = precomputed_df.rename(columns={
+                            "gene": "names",
+                            "p_val": "pvals",
+                            "p_val_adj": "pvals_adj",
+                            "avg_log2FC": "logfoldchanges",
+                            "avg_logExp": "scores", # is this the same?
+                        })
+
+                        # Filter df to this cell type
+                        ct_precomputed_df = precomputed_df.loc[precomputed_df["cluster"] == cell_type].copy()
+                        ct_precomputed_df = cleanup_rank_genes_groups_df(ct_precomputed_df)
+
+                        uns_key = cmp.append_df("uns", "rank_genes_groups_precomputed", {}, {
+                            "obsType": "cell",
+                            "featureType": "gene",
+                            "obsSetSelection": [[cell_type_col, cell_type]],
+                            **({
+                                "sampleSetSelection": [[sample_group_col, sample_group_value]],
+                                "sampleSetFilter": [[sample_group_col, sample_group_value]],
+                            } if sample_group_acronym != "All-Samples" else {}),
+                        })
+                        ladata.uns[uns_key] = ct_precomputed_df
+                        print(f"Added precomputed DEG results for cell type {cell_type} and sample group {sample_group_acronym}")
+            # End KPMP Explorer logic.
+
 
             # Compute gene enrichment.
             enrichment_df = enrichment_dict.get(cell_type)

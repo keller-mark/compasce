@@ -11,7 +11,7 @@ authors = [
 description = "Preprocessing functions that support comparison of single-cell data"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["single-cell"]
 classifiers = [
   'Development Status :: 4 - Beta',
@@ -29,16 +29,17 @@ dependencies = [
   'pylemur @ git+https://github.com/keller-mark/pyLemur@94b03c7', # with dask
   #'pylemur @ git+https://github.com/keller-mark/pyLemur@40c9530', # without dask
   'scanpy @ git+https://github.com/keller-mark/scanpy@af55e9d',
-  'anndata>=0.9.0,<0.11',
+  "anndata @ git+https://github.com/keller-mark/anndata@keller-mark/bad-encoding-fallback",
+  "numcodecs>=0.5.7,<0.16.0",
+  "zarr>=2.5.0,<3",
   'scipy==1.12.0',
   'dask[distributed]',
   'dask-ml',
   'distributed',
   'joblib',
   'scikit-learn>=1.5.1',
-  'zarr<3.0.0',
   'gprofiler-official',
-  "mudata==0.3.1",
+  #"mudata==0.3.1",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +49,8 @@ dev = [
   'pytest-memray',
   'flake8==3.8.4',
   'jupyterlab',
-  # 'snakemake<=8.0.0',
+  'snakemake<8', # needs --slurm arg
+  'pulp<2.8', # Reference: https://github.com/snakemake/snakemake/issues/2607
   'pertpy',
   'requests',
   'altair',

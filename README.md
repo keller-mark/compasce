@@ -142,7 +142,7 @@ uv sync --extra dev
 or
 
 ```sh
-conda create -n compasce-env python=3.10
+conda create -n compasce-env python=3.11
 conda activate compasce-env
 pip install -e .
 ```
@@ -243,6 +243,34 @@ snakemake --snakefile scrnaseq_heart.smk -j 10 --rerun-triggers mtime \
   --keep-incomplete --keep-going --latency-wait 30 --slurm \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
 ```
+
+#### For KPMP Explorer data processing
+
+On o2, download the raw data from S3:
+
+```sh
+srun -p interactive --pty -t 3:00:00 -n 1 --mem 16G bash
+# source ~/.bashrc_mark
+# ssh-add
+cd ~/lab/scmd-analysis/raw
+mkdir kpmp-aug-2025
+cd kpmp-aug-2025
+
+aws s3 cp s3://vitessce-data-v2/kpmp-atlas-v2/sn-rna-seq/raw . --recursive
+
+conda create -n compasce-env python=3.11
+pip install -e ".[dev]"
+```
+
+```sh
+conda activate compasce-env2
+export SLURM_ACCOUNT=$(sshare -u mk596 -U | cut -d ' ' -f 1 | tail -n 1)
+
+snakemake --snakefile scrnaseq_kpmp.smk -j 10 --rerun-triggers mtime \
+  --keep-incomplete --keep-going --latency-wait 30 --slurm \
+  --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
+```
+
 
 <!--
 This script took approximately 48 hours to complete with 160 GB of RAM.
