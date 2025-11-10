@@ -25,7 +25,7 @@ classifiers = [
 dependencies = [
   'pandas',
   'numpy<=2.0.0',
-  'pertpy[de,coda] @ git+https://github.com/keller-mark/pertpy@3f34fbe',
+  'pertpy[de]==1.0.2',
   'pylemur @ git+https://github.com/keller-mark/pyLemur@94b03c7', # with dask
   #'pylemur @ git+https://github.com/keller-mark/pyLemur@40c9530', # without dask
   'scanpy @ git+https://github.com/keller-mark/scanpy@af55e9d',
@@ -49,7 +49,8 @@ dev = [
   'pytest-memray',
   'flake8==3.8.4',
   'jupyterlab',
-  'snakemake<8', # needs --slurm arg
+  #'datrie==0.8.2', # snakemake depends on datrie, and 0.8.3 fails to install.
+  #'snakemake<8', # needs --slurm arg
   'pulp<2.8', # Reference: https://github.com/snakemake/snakemake/issues/2607
   'pertpy',
   'requests',
