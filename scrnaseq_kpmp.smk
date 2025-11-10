@@ -1,4 +1,5 @@
 include: "./common.smk"
+configfile: "./scrnaseq_kpmp.yaml"
 
 ZARR_PATH = join(PROCESSED_DIR, "kpmp-aug-2025.adata.zarr")
 

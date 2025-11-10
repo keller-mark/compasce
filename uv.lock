@@ -516,6 +516,7 @@ dependencies = [
     { name = "anndata" },
     { name = "dask", extra = ["distributed"] },
     { name = "dask-ml" },
+    { name = "decoupler" },
     { name = "distributed" },
     { name = "gprofiler-official" },
     { name = "joblib" },
@@ -523,6 +524,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "pertpy", extra = ["de"] },
+    { name = "pydeseq2" },
     { name = "pylemur" },
     { name = "scanpy" },
     { name = "scikit-learn" },
@@ -550,6 +552,7 @@ requires-dist = [
     { name = "build", marker = "extra == 'dev'", specifier = "==0.1.0" },
     { name = "dask", extras = ["distributed"] },
     { name = "dask-ml" },
+    { name = "decoupler", specifier = "==2.1.2" },
     { name = "distributed" },
     { name = "flake8", marker = "extra == 'dev'", specifier = "==3.8.4" },
     { name = "gprofiler-official" },
@@ -561,6 +564,7 @@ requires-dist = [
     { name = "pertpy", marker = "extra == 'dev'" },
     { name = "pertpy", extras = ["de"], specifier = "==1.0.2" },
     { name = "pulp", marker = "extra == 'dev'", specifier = "<2.8" },
+    { name = "pydeseq2", specifier = "==0.5.2" },
     { name = "pylemur", git = "https://github.com/keller-mark/pyLemur?rev=94b03c7" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.2.4" },
     { name = "pytest-memray", marker = "extra == 'dev'" },
@@ -751,6 +755,26 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/66/0c/8d907af351aa16b42caae42f9d6aa37b900c67308052d10fdce809f8d952/decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330", size = 35016 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d5/50/83c593b07763e1161326b3b8c6686f0f4b0f24d5526546bee538c89837d6/decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186", size = 9073 },
+]
+
+[[package]]
+name = "decoupler"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "adjusttext" },
+    { name = "anndata" },
+    { name = "docrep" },
+    { name = "marsilea" },
+    { name = "numba" },
+    { name = "requests" },
+    { name = "scipy" },
+    { name = "session-info2" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/30/9d/09d980108a3e517806c981f10329a65c6d1c20db65692a1f62cdde2fbc0a/decoupler-2.1.2.tar.gz", hash = "sha256:2b67c3ed2d78ffdc7cfeb30a72d25901c254138221283588e60474c0082e33db", size = 1187719 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5e/b1/50ae66eb3358135916157a65b433c29dd7aa3e68e04409dfcd0f04356648/decoupler-2.1.2-py3-none-any.whl", hash = "sha256:013de6d22e4cc6c9d4049de65b4fd89069cb9afc3349482a495b50ab8f590184", size = 120890 },
 ]
 
 [[package]]
@@ -1671,6 +1695,18 @@ wheels = [
 ]
 
 [[package]]
+name = "legendkit"
+version = "0.3.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7c/b7/b1aa7a8075cd90d1231ca39cc01eaf004ba84bc192cc763a3212fc4b6311/legendkit-0.3.6.tar.gz", hash = "sha256:89c0d95c262420086f08c1fff06f9d3d3ee779cacf598464bec7bca10ac36853", size = 19490 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/92/bd62fb14acf1f74ed021b3e2f105466a6b47b0ebedc5daddada4b88b47b4/legendkit-0.3.6-py3-none-any.whl", hash = "sha256:345ecb286d9aa8775c4a6498a8b0a37f76a2736870220d0687396db33b5bf91d", size = 24861 },
+]
+
+[[package]]
 name = "lightning"
 version = "2.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1825,6 +1861,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0d/80/0985960e4b89922cb5a0bac0ed39c5b96cbc1a536a99f30e8c220a996ed9/MarkupSafe-3.0.2-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:131a3c7689c85f5ad20f9f6fb1b866f402c445b220c19fe4308c0b147ccd2ad9", size = 24098 },
     { url = "https://files.pythonhosted.org/packages/82/78/fedb03c7d5380df2427038ec8d973587e90561b2d90cd472ce9254cf348b/MarkupSafe-3.0.2-cp313-cp313t-win32.whl", hash = "sha256:ba8062ed2cf21c07a9e295d5b8a2a5ce678b913b45fdf68c32d95d6c1291e0b6", size = 15208 },
     { url = "https://files.pythonhosted.org/packages/4f/65/6079a46068dfceaeabb5dcad6d674f5f5c61a6fa5673746f42a9f4c233b3/MarkupSafe-3.0.2-cp313-cp313t-win_amd64.whl", hash = "sha256:e444a31f8db13eb18ada366ab3cf45fd4b31e4db1236a4448f68778c1d1a5a2f", size = 15739 },
+]
+
+[[package]]
+name = "marsilea"
+version = "0.5.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "legendkit" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas", extra = ["parquet"] },
+    { name = "platformdirs" },
+    { name = "scipy" },
+    { name = "seaborn" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b2/59/d063fdc70d7252f6fc1e4324bab82dd39fc84dd143a0d016c4e87a459565/marsilea-0.5.6.tar.gz", hash = "sha256:f58196edbfc7fc2cec819be14fb112dd9054f4149089f257c9436c97ed275855", size = 73564 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/ab/0474bce38f996bfc5f965ff639b2b256944d317a92ce4404bb899d69d103/marsilea-0.5.6-py3-none-any.whl", hash = "sha256:5d646d718b84a6c93f1ca7ef2e5f3691b71e0c25644aa535f215c552a43a424a", size = 84980 },
 ]
 
 [[package]]
@@ -2569,6 +2623,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ab/5f/b38085618b950b79d2d9164a711c52b10aefc0ae6833b96f626b7021b2ed/pandas-2.2.3-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:ad5b65698ab28ed8d7f18790a0dc58005c7629f227be9ecc1072aa74c0c1d43a", size = 13098436 },
 ]
 
+[package.optional-dependencies]
+parquet = [
+    { name = "pyarrow" },
+]
+
 [[package]]
 name = "pandocfilters"
 version = "1.5.1"
@@ -2939,7 +2998,7 @@ wheels = [
 
 [[package]]
 name = "pydeseq2"
-version = "0.5.0"
+version = "0.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anndata" },
@@ -2951,9 +3010,9 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a1/f4/ec769167b69e4e9267e23563cc60282d1b44ed687609304642cbfb9c1ebc/pydeseq2-0.5.0.tar.gz", hash = "sha256:dec59cee6163c3dc5a333008afc52700c3678e8ebe08583724611110dd8db5bc", size = 51597 }
+sdist = { url = "https://files.pythonhosted.org/packages/d4/82/e9c9246608b57977682bdc32efa6a6ec67784242d8ac284513bfe8b0fe27/pydeseq2-0.5.2.tar.gz", hash = "sha256:9a124793f3155e40863f63cb92d73f815d01c6e0b3cc0d8e8730141c134c16f4", size = 51377 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c6/19/1d442931450c877474b3caf859323b59c841f5125aca4a9bbac2482e5f43/pydeseq2-0.5.0-py3-none-any.whl", hash = "sha256:6cd89bd3bdf48ec62cc0ffca8ca92a4ad59b2ea751be22b1f594ce2a53a58372", size = 46698 },
+    { url = "https://files.pythonhosted.org/packages/43/8c/f637418a679fb49bc3368940e0705df3b43c85b2ff5ae91455e78401750b/pydeseq2-0.5.2-py3-none-any.whl", hash = "sha256:60014562d85f8c1c56cc7d169a4f0e29e9d615a863b93401add5fc30a61513d9", size = 44627 },
 ]
 
 [[package]]

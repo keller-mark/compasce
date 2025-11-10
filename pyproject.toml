@@ -26,6 +26,9 @@ dependencies = [
   'pandas',
   'numpy<=2.0.0',
   'pertpy[de]==1.0.2',
+  'decoupler==2.1.2',
+  # Due to https://github.com/owkin/PyDESeq2/issues/387
+  'pydeseq2==0.5.2',
   'pylemur @ git+https://github.com/keller-mark/pyLemur@94b03c7', # with dask
   #'pylemur @ git+https://github.com/keller-mark/pyLemur@40c9530', # without dask
   'scanpy @ git+https://github.com/keller-mark/scanpy@af55e9d',
