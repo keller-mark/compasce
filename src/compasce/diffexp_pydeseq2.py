@@ -76,6 +76,11 @@ def compute_diffexp_pydeseq2(ladata, cm):
 
             print(df.head())
 
+            # Clean up to reduce memory usage
+            del pds2
+            del df
+        del pdata
+
         # Within cell type (case vs. control)
         sample_group_pairs = cm.sample_group_pairs
         
@@ -116,6 +121,10 @@ def compute_diffexp_pydeseq2(ladata, cm):
                         "sampleSetFilter": [[sample_group_col, sample_group_left], [sample_group_col, sample_group_right]],
                     })
                     ladata.uns[uns_key] = df
+
+                    del pdata
+                    del pds2
+                    del df
 
                 except (IndexError, ValueError) as e:
                     print(f"Error: likely due to insufficient data for comparison for {cell_type} and sample group pair {sample_group_pair}")
