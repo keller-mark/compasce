@@ -8,6 +8,10 @@ from requests.exceptions import ConnectionError
 import decoupler as dc
 import pertpy as pt
 
+from .pseudobulk import pseudobulk
+
+
+
 # Functions for cleaning up dataframes
 def cleanup_rank_genes_groups_df(df):
     # Rename the pds2.test_contrasts output to match scanpy's rank_genes_groups_df format
@@ -23,6 +27,7 @@ def cleanup_rank_genes_groups_df(df):
     df = df.sort_values(by="pvals_adj", ascending=True)
     df = df.set_index("names")
     return df
+
 
 def compute_diffexp_pydeseq2(ladata, cm):
     print(f"Running pseudobulk for cell types vs rest, using PyDESeq2")
@@ -41,8 +46,9 @@ def compute_diffexp_pydeseq2(ladata, cm):
         cell_types = [x for x in cell_types if pd.notna(x)]
         
         # Reference: https://pertpy.readthedocs.io/en/stable/tutorials/notebooks/differential_gene_expression.html#pseudobulks
-        #pdata = dc.pp.pseudobulk(ladata, sample_col="specimen", groups_col="subclass_l1", layer="counts", mode="sum", verbose=True)
-        pdata = dc.pp.pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col=cell_type_col, layer="counts", mode="sum", empty=True, verbose=True)
+        # pdata = dc.pp.pseudobulk(ladata, sample_col="specimen", groups_col="subclass_l1", layer="counts", mode="sum", verbose=True)
+        # pdata = dc.pp.pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col=cell_type_col, layer="counts", mode="sum", empty=True, verbose=True)
+        pdata = pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col=cell_type_col, layer="counts", mode="sum")
 
         for cell_type in cell_types:
             print(f"Getting diffexp test results for {cell_type} vs rest")
@@ -96,7 +102,8 @@ def compute_diffexp_pydeseq2(ladata, cm):
                     #sc.tl.rank_genes_groups(ladata, groupby="cell_type_sample_group", groups=[f"{cell_type}_{sample_group_right}"], reference=f"{cell_type}_{sample_group_left}", method="wilcoxon", layer="logcounts", key_added=key_added)
                     
                     # TODO: only pseudobulk once per unique cell_type_col and sample_group_col combination?
-                    pdata = dc.pp.pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col="cell_type_sample_group", layer="counts", mode="sum", empty=True, verbose=True)
+                    # pdata = dc.pp.pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col="cell_type_sample_group", layer="counts", mode="sum", empty=True, verbose=True)
+                    pdata = pseudobulk(ladata, sample_col=cm.sample_id_col, groups_col="cell_type_sample_group", layer="counts", mode="sum")
                     
                     # For cell type vs. rest, we use a design such as "~subclass_l1"
                     # Reference: https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html
