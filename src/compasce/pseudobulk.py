@@ -123,5 +123,5 @@ def pseudobulk(ladata, sample_col, groups_col, layer="counts", mode="sum"):
         psbulk = AnnData(X=output_arr, obs=new_obs, var=var_df)
         return psbulk
 
-    pseudobulk_dask = create_dask_wrapper(_pseudobulk, mode=mode, n_rows=n_rows, n_cols=n_cols, sample_col=sample_col, groups_col=groups_col, samples=samples, groups=groups, obs=obs, new_obs=new_obs)
-    return pseudobulk_dask(get_input_arr, put_output_arr)
+    pseudobulk_dask = create_dask_wrapper(_pseudobulk)
+    return pseudobulk_dask(get_input_arr, put_output_arr, mode=mode, n_rows=n_rows, n_cols=n_cols, sample_col=sample_col, groups_col=groups_col, samples=samples, groups=groups, obs=obs, new_obs=new_obs)
