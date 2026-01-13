@@ -76,11 +76,11 @@ def _pseudobulk(X, n_rows, n_cols, sample_col, groups_col, samples, groups, obs,
             group_sum = da.sum(X[obs_mask, :], axis=0)
 
             # Skip if few cells or not enough counts
-            ncell = group_sum.shape[0].compute()
+            ncell = group_sum.shape[0]
             count = da.sum(group_sum).compute()
             ncells[i] = ncell
             counts[i] = count
-            m = f"group={grp}\tsample={smp}\tcells={ncell}\tcounts={count}"
+            # m = f"group={grp}\tsample={smp}\tcells={ncell}\tcounts={count}"
             # _log(m, level="info", verbose=verbose)
             # Write new meta-data
             index = smp + "_" + grp
