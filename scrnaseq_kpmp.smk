@@ -91,7 +91,8 @@ rule compute_diffexp_pydeseq2:
 
 rule compute_diffabundance:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2") # TEMP
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
   resources:
@@ -108,7 +109,8 @@ rule compute_diffabundance:
 
 rule densmap:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2") # TEMP
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap")
   resources:
