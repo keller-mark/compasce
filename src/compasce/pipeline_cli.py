@@ -4,6 +4,7 @@ from ._o2 import create_o2_dask_client
 from .normalization import normalize_basic, normalize_pearson_residuals
 from .densmap import densmap
 from .diffexp import compute_diffexp
+from .diffexp_pydeseq2 import compute_diffexp_pydeseq2
 from .diffabundance import compute_diffabundance
 from .lemur import compute_lemur
 from .io.lazy_anndata import LazyAnnData
@@ -22,6 +23,7 @@ def run_cli():
         'normalize_pearson_residuals',
         'densmap',
         'compute_diffexp',
+        'compute_diffexp_pydeseq2',
         'compute_diffabundance',
         'compute_lemur',
     ])
@@ -35,6 +37,7 @@ def run_cli():
         'normalize_pearson_residuals': normalize_pearson_residuals,
         'densmap': densmap,
         'compute_diffexp': compute_diffexp,
+        'compute_diffexp_pydeseq2': compute_diffexp_pydeseq2,
         'compute_diffabundance': compute_diffabundance,
         'compute_lemur': compute_lemur,
     }

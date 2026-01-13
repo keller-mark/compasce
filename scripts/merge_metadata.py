@@ -17,6 +17,7 @@ if __name__ == "__main__":
         'normalize_pearson_residuals',
         'densmap',
         'compute_diffexp',
+        'compute_diffexp_pydeseq2',
         'compute_diffabundance',
         'compute_lemur',
     ])
