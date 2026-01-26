@@ -118,9 +118,13 @@ def pseudobulk(ladata, sample_col, groups_col, layer="counts", mode="sum"):
         for col in new_obs.columns:
             if not pd.api.types.is_numeric_dtype(new_obs[col]):
                 new_obs[col] = new_obs[col].astype("category")
+
+        X = output_arr.compute()
+
+        print("Pseudobulked matrix shape:", X.shape)
         
         # Create new AnnData
-        psbulk = AnnData(X=output_arr, obs=new_obs, var=var_df)
+        psbulk = AnnData(X=X, obs=new_obs, var=var_df)
         return psbulk
 
     pseudobulk_dask = create_dask_wrapper(_pseudobulk)
