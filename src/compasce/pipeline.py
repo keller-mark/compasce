@@ -1,6 +1,7 @@
 from .normalization import normalize_basic, normalize_pearson_residuals
 from .densmap import densmap
 from .diffexp import compute_diffexp
+from .diffexp_pydeseq2 import compute_diffexp_pydeseq2
 from .diffabundance import compute_diffabundance
 from .lemur import compute_lemur
 from .io.lazy_anndata import create_lazy_anndata, create_sample_df
@@ -74,6 +75,11 @@ def run_all(get_adata, zarr_path, overwrite=False, client=None, sample_id_col=No
     densmap(ladata, cm)
 
     compute_diffexp(ladata, cm, input_deg_dir=input_deg_dir)
+
+    ladata.uns["comparison_metadata"] = cm.serialize()
+    ladata.save()
+
+    compute_diffexp_pydeseq2(ladata, cm, input_deg_dir=input_deg_dir)
 
     ladata.uns["comparison_metadata"] = cm.serialize()
     ladata.save()

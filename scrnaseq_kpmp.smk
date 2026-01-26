@@ -1,4 +1,5 @@
 include: "./common.smk"
+configfile: "./scrnaseq_kpmp.yaml"
 
 ZARR_PATH = join(PROCESSED_DIR, "kpmp-aug-2025.adata.zarr")
 
@@ -13,7 +14,8 @@ rule merge_metadata:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_pearson_residuals"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap"),
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
+    #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2"),
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance"),
     #join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_lemur")
   output:
@@ -68,9 +70,29 @@ rule compute_diffexp:
         --function-name "compute_diffexp"
     """
 
+rule compute_diffexp_pydeseq2:
+  input:
+    metadata_path=join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    deg_dir=join(RAW_DIR, "kpmp-aug-2025")
+  output:
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2")
+  resources:
+    slurm_partition="medium",
+    runtime=60*24*5, # 5 days
+    mem_mb=240_000, # 240 GB
+    cpus_per_task=4
+  shell:
+    """
+    compasce \
+        --zarr-path {ZARR_PATH} \
+        --input-deg-dir {input.deg_dir} \
+        --function-name "compute_diffexp_pydeseq2"
+    """
+
 rule compute_diffabundance:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2") # TEMP
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffabundance")
   resources:
@@ -87,7 +109,8 @@ rule compute_diffabundance:
 
 rule densmap:
   input:
-    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic")
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.normalize_basic"),
+    join_zdone(ZARR_PATH, "uns", "comparison_metadata.compute_diffexp_pydeseq2") # TEMP
   output:
     join_zdone(ZARR_PATH, "uns", "comparison_metadata.densmap")
   resources:

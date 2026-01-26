@@ -137,6 +137,15 @@ For example, methods may have long execution times or high computational resourc
 uv venv
 source .venv/bin/activate
 uv sync --extra dev
+
+unset CONDA_PREFIX
+
+# Install snakemake v7.
+# There is an issue with building its datrie dependency
+# during installation on recent python versions.
+# Reference: https://github.com/pytries/datrie/issues/97#issuecomment-2489558204
+AR=/opt/homebrew/opt/llvm/bin/llvm-ar uv pip install datrie
+uv pip install "snakemake<8"
 ```
 
 or
@@ -269,6 +278,17 @@ export SLURM_ACCOUNT=$(sshare -u mk596 -U | cut -d ' ' -f 1 | tail -n 1)
 snakemake --snakefile scrnaseq_kpmp.smk -j 10 --rerun-triggers mtime \
   --keep-incomplete --keep-going --latency-wait 30 --slurm \
   --default-resources slurm_account=$SLURM_ACCOUNT slurm_partition=short runtime=30
+```
+
+Upload to S3:
+```sh
+srun -p interactive --pty -t 4:00:00 -n 1 --mem 16G bash
+# source ~/.bashrc_mark
+# ssh-add
+cd ~/lab/scmd-analysis/processed
+
+aws s3 cp kpmp-aug-2025.adata.zarr s3://vitessce-data-v2/kpmp-atlas-v2/sn-rna-seq/processed/kpmp-aug-2025.adata.zarr --recursive
+
 ```
 
 
